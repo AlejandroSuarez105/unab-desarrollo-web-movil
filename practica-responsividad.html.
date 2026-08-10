@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Practica Responsividad - Webpage</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<body>
+
+<!-- ENCABEZADO -->
+<nav class="navbar navbar-default">
+  <div class="container">
+    <a class="navbar-brand" href="#">Mi Sitio</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="jumbotron text-center">
+  <h1>Titulo principal</h1>
+  <p>Texto de bienvenida</p>
+</div>
+
+<!-- SECCIONES INFORMATIVAS (Grid System) -->
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-4">
+      <h3>Seccion 1</h3>
+      <p>Texto de la seccion 1</p>
+    </div>
+    <div class="col-xs-12 col-sm-4">
+      <h3>Seccion 2</h3>
+      <p>Texto de la seccion 2</p>
+    </div>
+    <div class="col-xs-12 col-sm-4">
+      <h3>Seccion 3</h3>
+      <p>Texto de la seccion 3</p>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACTO -->
+<div class="container text-center">
+  <h3>Contacto</h3>
+  <p>correo@ejemplo.com</p>
+</div>
+
+<!-- PIE -->
+<footer class="container text-center">
+  <p>2026</p>
+</footer>
+
+</body>
+</html>

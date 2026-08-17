@@ -40,6 +40,41 @@
             <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#myModal">Acceder</button>
         </div>
     </nav>
+    
+    <!-- Carrusel -->
+    <div id="carruselPokemon" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carruselPokemon" data-bs-slide-to="0" class="active" aria-current="true"></button>
+            <button type="button" data-bs-target="#carruselPokemon" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#carruselPokemon" data-bs-slide-to="2"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="bg-danger text-white text-center py-5">
+                    <h2>Bienvenido a PokeCentro</h2>
+                    <p>El mejor lugar para cuidar a tus Pokemon</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="bg-primary text-white text-center py-5">
+                    <h2>Curacion gratuita 24/7</h2>
+                    <p>La Enfermera Joy siempre esta lista para ayudarte</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="bg-warning text-dark text-center py-5">
+                    <h2>Tienda especializada</h2>
+                    <p>Encuentra pokebolas, pociones y mas</p>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carruselPokemon" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carruselPokemon" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
 
     <!-- Container -->
     <div class="container-fluid bg-warning py-5">

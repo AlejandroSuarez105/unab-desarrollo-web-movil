@@ -1,0 +1,80 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Index" id="mBhs8V_EnwALouUKmKYV">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-1" parent="1" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" value="Logo" vertex="1">
+          <mxGeometry height="60" width="120" x="120" y="-930" as="geometry" />
+        </mxCell>
+        <mxCell id="pnUgPraFlAozaJQ6I0Xt-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Carrito" vertex="1">
+          <mxGeometry height="60" width="60" x="660" y="-930" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-2" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="Inicio de sesion" vertex="1">
+          <mxGeometry height="70" width="70" x="570" y="-930" as="geometry" />
+        </mxCell>
+        <mxCell id="pnUgPraFlAozaJQ6I0Xt-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Carrusel&lt;br&gt;(Promociones actuales / Imagenes)" vertex="1">
+          <mxGeometry height="290" width="600" x="120" y="-810" as="geometry" />
+        </mxCell>
+        <mxCell id="pnUgPraFlAozaJQ6I0Xt-3" edge="1" parent="1" source="pnUgPraFlAozaJQ6I0Xt-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;innerLoopWaypoints=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="pnUgPraFlAozaJQ6I0Xt-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-3" edge="1" parent="1" source="WuYkRmd06rIhJUgt4LDz-1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="-960" />
+            </Array>
+            <mxPoint x="400" y="-750" as="sourcePoint" />
+            <mxPoint x="180" y="-1000" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Vuelta a inicio" vertex="1">
+          <mxGeometry height="80" width="120" x="120" y="-1080" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-5" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="Menu" vertex="1">
+          <mxGeometry height="60" width="60" x="420" y="-930" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-6" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="Sucursales" vertex="1">
+          <mxGeometry height="60" width="60" x="495" y="-930" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Combos" vertex="1">
+          <mxGeometry height="60" width="120" x="120" y="-500" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Combo 1" vertex="1">
+          <mxGeometry height="60" width="120" x="120" y="-420" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Combo 2" vertex="1">
+          <mxGeometry height="60" width="120" x="270" y="-420" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Combo 3" vertex="1">
+          <mxGeometry height="60" width="120" x="425" y="-420" as="geometry" />
+        </mxCell>
+        <mxCell id="WuYkRmd06rIhJUgt4LDz-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Combo 4" vertex="1">
+          <mxGeometry height="60" width="120" x="580" y="-420" as="geometry" />
+        </mxCell>
+        <mxCell id="pnUgPraFlAozaJQ6I0Xt-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;rounded=0;" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Resumen de&lt;/div&gt;&lt;div&gt;Pedidos&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="120" x="630" y="-1080" as="geometry" />
+        </mxCell>
+        <mxCell id="pnUgPraFlAozaJQ6I0Xt-6" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="689.41" y="-960" />
+            </Array>
+            <mxPoint x="689.41" y="-930" as="sourcePoint" />
+            <mxPoint x="689.41" y="-1000" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pnUgPraFlAozaJQ6I0Xt-10" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points" />
+            <mxPoint x="524.41" y="-930" as="sourcePoint" />
+            <mxPoint x="524.41" y="-1000" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pnUgPraFlAozaJQ6I0Xt-12" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;rounded=0;" value="Sucursales en Maps" vertex="1">
+          <mxGeometry height="80" width="120" x="465" y="-1080" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

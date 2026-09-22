@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carrito — La Fornace</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-fornace">
+  <div class="container">
+    <a class="navbar-brand" href="index.html"><span class="llama">●</span> La Fornace</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="border-color:#2c2c2c;">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
+        <li class="nav-item"><a class="nav-link" href="sucursales.html">Sucursales</a></li>
+        <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
+      </ul>
+      <div class="d-flex gap-2 mt-3 mt-lg-0">
+        <button class="icono-boton" data-bs-toggle="modal" data-bs-target="#modalLogin">Iniciar sesión</button>
+        <a href="carrito.html" class="icono-boton">🛒 Carrito <span class="badge-carrito" data-badge-carrito>0</span></a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="seccion container" style="padding-bottom:1rem;">
+  <h1 class="seccion-titulo">Resumen de tu pedido</h1>
+  <p class="texto-muted">Revisa tus productos antes de confirmar. El pago y despacho son simulados en esta entrega.</p>
+</header>
+
+<section class="container pb-5">
+  <div class="row g-4">
+    <div class="col-12 col-lg-8">
+      <div id="lista-carrito"></div>
+
+      <div id="carrito-vacio" class="text-center py-5 d-none">
+        <div style="font-size:3rem;">🛒</div>
+        <h3 class="h5 mt-2">Tu carrito está vacío</h3>
+        <p class="texto-muted">Agrega productos desde el menú para verlos aquí.</p>
+        <a href="menu.html" class="btn btn-fornace mt-2">Ir al menú</a>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div id="resumen-carrito" class="resumen-total d-none">
+        <h3 class="h5 mb-3">Resumen</h3>
+        <div class="linea"><span>Subtotal</span><span id="carrito-subtotal">$0</span></div>
+        <div class="linea"><span>Despacho</span><span id="carrito-despacho">$0</span></div>
+        <div class="linea total"><span>Total</span><span id="carrito-total">$0</span></div>
+        <p class="texto-muted small mt-2">Despacho gratis en pedidos sobre $15.000, dentro de 3&nbsp;km del local.</p>
+        <button class="btn btn-fornace w-100 mt-2" onclick="confirmarPedidoSimulado(event)">Confirmar pedido (simulado)</button>
+        <a href="menu.html" class="btn btn-fornace-outline w-100 mt-2">Seguir comprando</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer-fornace">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <h5>La Fornace</h5>
+        <p class="texto-muted small">Pizza artesanal a la piedra, horneada con leña, con despacho a domicilio en Maipú y alrededores.</p>
+        <div class="redes">
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="WhatsApp">WA</a>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <h5>Navegación</h5>
+        <a href="index.html">Inicio</a>
+        <a href="menu.html">Menú</a>
+        <a href="sucursales.html">Sucursales</a>
+        <a href="contacto.html">Contacto</a>
+      </div>
+      <div class="col-6 col-md-3">
+        <h5>Ayuda</h5>
+        <a href="carrito.html">Mi carrito</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalLogin">Iniciar sesión</a>
+        <a href="contacto.html">Trabaja con nosotros</a>
+      </div>
+      <div class="col-12 col-md-3">
+        <h5>Horario</h5>
+        <p class="texto-muted small mb-0">Lunes a Domingo<br>12:30 – 23:30 hrs</p>
+      </div>
+    </div>
+    <div class="copy text-center">
+      © 2026 Pizzeria La Fornace. Proyecto académico — Desarrollo Web y Móvil, UNAB.
+    </div>
+  </div>
+</footer>
+
+<div id="toast-contenedor" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:2000;"></div>
+
+<div class="modal fade modal-fornace" id="modalLogin" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title titulo-display">Iniciar sesión</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="texto-muted small">Acceso simulado — esta entrega no incluye backend.</p>
+        <form class="needs-validation" novalidate onsubmit="manejarLoginSimulado(event)">
+          <div class="mb-3">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" required placeholder="tucorreo@ejemplo.com">
+            <div class="invalid-feedback">Ingresa un correo válido.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" class="form-control" required minlength="4" placeholder="••••••••">
+            <div class="invalid-feedback">Ingresa tu contraseña.</div>
+          </div>
+          <button type="submit" class="btn btn-fornace w-100">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade modal-fornace" id="modalConfirmacion" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body py-5">
+        <div style="font-size:3rem;">✅</div>
+        <h3 class="h4 mt-3" style="color:var(--verde);">¡Pedido simulado con éxito!</h3>
+        <p class="texto-muted">En la Unidad 2 este flujo se conectará a la API real para procesar el pago y generar la boleta.</p>
+        <a href="index.html" class="btn btn-fornace mt-2">Volver al inicio</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  renderCarrito();
+</script>
+</body>
+</html>

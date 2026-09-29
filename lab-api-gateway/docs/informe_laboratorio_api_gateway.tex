@@ -1,0 +1,604 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codeframe}{RGB}{190,190,190}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+%----------------------------------------------------------------
+% PORTADA
+%----------------------------------------------------------------
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\Large Desarrollo Web y Móvil\par}
+  \vspace{1.5cm}
+  {\huge\bfseries Informe de laboratorio\par}
+  \vspace{0.5cm}
+  {\LARGE API Gateway local con FastAPI\\ y HashiCorp Vault\par}
+  \vspace{0.8cm}
+  {\large Seguridad, administración de secretos y enrutamiento\\ hacia una API en otro host\par}
+  \vfill
+  {\large
+  \textbf{Estudiantes:} Alejandro Suarez\\
+  \hspace{2.95cm}Alvaro Asencios\\[0.4cm]
+  \textbf{Docente:} Ernesto Vivanco\\[0.4cm]
+  \textbf{Fecha:} 28 de septiembre de 2026\par}
+  \vspace{2cm}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%----------------------------------------------------------------
+\section{Introducción}
+%----------------------------------------------------------------
+
+En este laboratorio construimos, paso a paso, una arquitectura local en la que un cliente no puede llamar directamente a una API de negocio. Todas las solicitudes pasan primero por un \textbf{API Gateway}, que valida un token Bearer, consulta los secretos guardados en \textbf{HashiCorp Vault} y, solo si la solicitud es válida, la reenvía a una API que corre en otro host.
+
+El flujo general que se implementó es:
+
+\begin{center}
+Cliente $\rightarrow$ Bearer Token $\rightarrow$ API Gateway $\rightarrow$ Vault $\rightarrow$ Validación $\rightarrow$ API remota
+\end{center}
+
+Los objetivos que nos propusimos cumplir fueron:
+
+\begin{itemize}[noitemsep]
+  \item construir una API REST simple con FastAPI;
+  \item implementar un API Gateway local;
+  \item guardar los secretos fuera del código fuente usando Vault;
+  \item validar un token Bearer en el Gateway;
+  \item enrutar solicitudes hacia una API ubicada en otro equipo;
+  \item impedir que el backend acepte solicitudes que no traigan la credencial interna del Gateway;
+  \item entender que autenticación, autorización, administración de secretos y aislamiento de red son mecanismos distintos.
+\end{itemize}
+
+%----------------------------------------------------------------
+\section{Entorno y adaptación del laboratorio}
+%----------------------------------------------------------------
+
+La guía pide dos hosts. Nosotros solo teníamos una laptop con Ubuntu, así que simulamos el segundo host con un contenedor de Docker conectado a una red propia con direcciones IP fijas. De esta forma el backend queda realmente en otra ``máquina'' con otra IP, y más adelante pude aplicar una regla de firewall con sentido.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Rol} & \textbf{Implementación} & \textbf{IP} & \textbf{Servicio (puerto)} \\
+\midrule
+HOST A & Laptop Ubuntu & 172.30.0.1 / 192.168.0.9 & Gateway (8000), Vault (8200) \\
+HOST B & Contenedor \texttt{hostb} & 172.30.0.20 & Backend (9000) \\
+Atacante & Contenedor temporal & 172.30.0.30 & Solo para pruebas de red \\
+\bottomrule
+\end{tabular}
+\caption{Equivalencia entre la arquitectura de la guía y nuestro entorno.}
+\end{table}
+
+Las direcciones \texttt{192.168.1.10} y \texttt{192.168.1.20} de la guía las reemplazamos por las nuestras. Las pruebas del cliente las hicimos contra la IP de nuestra laptop en el wifi, \texttt{192.168.0.9}.
+
+\textbf{Software usado:} Ubuntu con Python 3.14 en la laptop, Docker 29.1.3, la imagen \texttt{python:3.12-slim} para HOST B y la imagen \texttt{hashicorp/vault} (versión 2.1.1). Trabajamos con tres terminales: la primera para el backend, la segunda para el Gateway y la tercera para las pruebas con \texttt{curl}.
+
+%----------------------------------------------------------------
+\section{Desarrollo paso a paso}
+%----------------------------------------------------------------
+
+\subsection{Paso 1: conectividad entre hosts}
+
+Creamos una red de Docker con subred fija y levantamos HOST B con la IP \texttt{172.30.0.20}:
+
+\begin{lstlisting}[language=bash]
+docker network create --subnet 172.30.0.0/24 labnet
+docker run -dit --name hostb --network labnet --ip 172.30.0.20 \
+  -v ~/lab/backend-api:/app -w /app python:3.12-slim bash
+\end{lstlisting}
+
+Después probamos el ping en los dos sentidos (de HOST A a HOST B y de HOST B a HOST A) y en ambos hubo 0\% de pérdida de paquetes.
+
+\subsection{Paso 2: API REST normal en HOST B}
+
+Creamos \texttt{backend\_api.py} con tres rutas: \texttt{/health}, \texttt{/products} y \texttt{/orders}, y la ejecutamos con \texttt{uvicorn} en el puerto 9000 dentro de HOST B. Desde nuestra laptop, un \texttt{curl} a \texttt{http://172.30.0.20:9000/products} devolvió el JSON con Notebook y Monitor.
+
+En este punto el backend está completamente abierto: cualquiera que conozca la IP y el puerto obtiene los datos sin ninguna credencial (\texttt{Cliente $\rightarrow$ Backend}). Esto es justo lo que el resto del laboratorio busca arreglar.
+
+\subsection{Paso 3: API Gateway básico en HOST A}
+
+En la laptop creamos un entorno virtual, instalamos \texttt{fastapi}, \texttt{uvicorn} y \texttt{httpx}, y escribimos un \texttt{gateway.py} que solo reenvía \texttt{/api/products} y \texttt{/api/orders} al backend. En el log del backend vimos que las peticiones llegaban con origen \texttt{172.30.0.1}, es decir, quien llama al backend es el Gateway. Todavía no hay seguridad: el Gateway solo hace routing.
+
+\subsection{Pasos 4 y 5: Vault y secretos}
+
+Levantamos Vault en modo desarrollo con Docker (token raíz \texttt{dev-only-token}). Este modo solo sirve para el laboratorio, porque guarda todo en memoria y usa un token raíz conocido. Luego guardamos dos secretos distintos:
+
+\begin{lstlisting}[language=bash]
+docker exec -e VAULT_ADDR=http://127.0.0.1:8200 \
+  -e VAULT_TOKEN=dev-only-token vault-dev \
+  vault kv put secret/gateway \
+  client_token="student-token-123" \
+  backend_shared_secret="gateway-api-secret-456"
+\end{lstlisting}
+
+\begin{itemize}[noitemsep]
+  \item \texttt{client\_token}: identifica al \textbf{cliente} frente al Gateway.
+  \item \texttt{backend\_shared\_secret}: identifica al \textbf{Gateway} frente al backend.
+\end{itemize}
+
+Verificamos los valores con \texttt{vault kv get} y también con un \texttt{curl} a la ruta \texttt{/v1/secret/data/gateway}, que es la misma que usa el código del Gateway. Esto muestra la diferencia entre \textit{Client Identity} y \textit{Service Identity}: el cliente no debería conocer nunca el secreto entre Gateway y backend.
+
+\subsection{Pasos 6 y 7: proteger el backend}
+
+Reemplazamos \texttt{backend\_api.py} para que \texttt{/products} y \texttt{/orders} exijan el header \texttt{X-Gateway-Secret}. La comparación usa \texttt{secrets.compare\_digest}, que compara en tiempo constante. El secreto se le pasa al backend como variable de entorno (\texttt{INTERNAL\_GATEWAY\_SECRET}), y si falta el programa se niega a arrancar. Como HOST B es un contenedor, la variable la pasamos con la opción \texttt{-e} de \texttt{docker exec} en lugar de \texttt{export}.
+
+Resultados:
+\begin{itemize}[noitemsep]
+  \item \texttt{curl} directo sin credencial: \textbf{403 Forbidden}, ``Solicitud no autorizada desde Gateway''.
+  \item \texttt{curl} con el header \texttt{X-Gateway-Secret} correcto: \textbf{200 OK}.
+\end{itemize}
+
+\subsection{Pasos 8 a 10: Gateway seguro y escenarios de seguridad}
+
+Configuramos en la terminal del Gateway las variables \texttt{VAULT\_ADDR}, \texttt{VAULT\_TOKEN} y \texttt{BACKEND\_URL}, y reescribimos \texttt{gateway.py} para que:
+\begin{enumerate}[noitemsep]
+  \item extraiga el token Bearer del header \texttt{Authorization};
+  \item consulte Vault en cada solicitud;
+  \item compare el token recibido con el esperado;
+  \item si es válido, reenvíe la solicitud al backend agregando \texttt{X-Gateway-Secret} y \texttt{X-Authenticated-Client}.
+\end{enumerate}
+
+Probamos los tres escenarios de la guía:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Escenario} & \textbf{Resultado obtenido} & \textbf{Mensaje} \\
+\midrule
+A: sin token & 401 Unauthorized & ``Bearer token requerido'' \\
+B: token incorrecto & 401 Unauthorized & ``Token invalido'' \\
+C: token válido & 200 OK & Productos y \texttt{authenticated\_client} \\
+\bottomrule
+\end{tabular}
+\caption{Escenarios de seguridad del Paso 10.}
+\end{table}
+
+En el escenario C el JSON incluyó \texttt{"authenticated\_client":"student-client"}, lo que confirma que el backend recibió la identidad que le reenvió el Gateway.
+
+\subsection{Paso 11: flujo completo}
+
+Cuando llega una solicitud válida ocurre lo siguiente: el cliente envía el token; el Gateway lo extrae; consulta Vault; Vault entrega \texttt{client\_token} y \texttt{backend\_shared\_secret}; el Gateway compara (si falla, responde 401); si coincide, arma una nueva solicitud con \texttt{X-Gateway-Secret}; el backend valida esa credencial y solo entonces ejecuta la lógica de negocio.
+
+\subsection{Paso 12: rotación del token sin tocar el código}
+
+Cambiamos el token en Vault sin modificar ni reiniciar el Gateway:
+
+\begin{lstlisting}[language=bash]
+docker exec -e VAULT_ADDR=http://127.0.0.1:8200 \
+  -e VAULT_TOKEN=dev-only-token vault-dev \
+  vault kv put secret/gateway \
+  client_token="nuevo-token-789" \
+  backend_shared_secret="gateway-api-secret-456"
+\end{lstlisting}
+
+Vault creó la versión 2 del secreto. Desde ese momento \texttt{student-token-123} devolvió \textbf{401} y \texttt{nuevo-token-789} devolvió \textbf{200}. Esto demuestra que gestionar secretos con Vault no es lo mismo que dejar credenciales escritas en el código.
+
+\subsection{Paso 13: restringir también la red}
+
+El header \texttt{X-Gateway-Secret} protege al backend solo a nivel de aplicación, y un header HTTP se puede imitar. Para comprobarlo levantamos un contenedor ``atacante'' en \texttt{172.30.0.30} que conocía el secreto, y su petición directa al backend devolvió \textbf{200 OK}.
+
+Luego agregamos una regla de firewall que descarta las conexiones al puerto 9000 de HOST B que no vengan de HOST A:
+
+\begin{lstlisting}[language=bash]
+sudo iptables -I DOCKER-USER -d 172.30.0.20 -p tcp --dport 9000 \
+  ! -s 172.30.0.1 -j DROP
+\end{lstlisting}
+
+Después de la regla, la misma petición del atacante quedó en timeout sin recibir respuesta, y el contador de la regla marcó \texttt{5 pkts / 300 bytes DROP}. El Gateway siguió funcionando normalmente con \textbf{200 OK}, porque su tráfico sale de \texttt{172.30.0.1}. Con esto el backend queda protegido por dos capas independientes: la red y la aplicación.
+
+%----------------------------------------------------------------
+\section{Problemas encontrados y cómo los resolví}
+%----------------------------------------------------------------
+
+Durante el laboratorio nos encontramos con varios problemas que vale la pena dejar documentados:
+
+\begin{enumerate}
+  \item \textbf{\texttt{python} no existe en Ubuntu.} El comando dio ``command not found''. Usamos \texttt{python3}, y dentro del entorno virtual ya funciona \texttt{python}.
+
+  \item \textbf{Docker daba ``permission denied''.} Nuestro usuario no estaba en el grupo \texttt{docker}. Ejecutamos \texttt{sudo usermod -aG docker \$USER}, pero el cambio no se aplica hasta reiniciar la sesión. Como \texttt{newgrp} no estaba instalado, instalamos \texttt{util-linux-extra}. En las terminales nuevas tuvimos que usar \texttt{newgrp docker} o \texttt{sudo}.
+
+  \item \textbf{El backend ``dejaba de responder''.} Al principio presionamos \texttt{Ctrl+C} en la terminal donde corría \texttt{uvicorn}, y eso apagó el servidor. Entendimos que el servidor ocupa la terminal, así que necesitábamos una terminal para el backend, otra para el Gateway y otra para las pruebas.
+
+  \item \textbf{La regla de firewall no filtraba el tráfico.} Después de aplicarla, el atacante seguía recibiendo 200 OK. El motivo era que el atacante y HOST B están en el mismo bridge de Docker, y ese tráfico solo pasa por \texttt{iptables} si el módulo \texttt{br\_netfilter} está cargado. Lo cargamos con \texttt{sudo modprobe br\_netfilter} y activamos \texttt{net.bridge.bridge-nf-call-iptables=1}. Con eso la regla empezó a descartar paquetes.
+
+  \item \textbf{Vault apagado devolvía un 500 genérico.} El código de la guía solo controla el caso en que Vault responde con error, pero no el caso en que no responde: en ese caso salta \texttt{httpx.ReadTimeout} y FastAPI devuelve \texttt{Internal Server Error} en texto plano. Envolvimos la llamada a Vault en un \texttt{try/except} de \texttt{httpx.RequestError}, y así el 500 pasó a ser controlado, con el mensaje ``No fue posible acceder a Vault''. Para simular la caída usamos \texttt{docker pause} en lugar de \texttt{stop}, porque el modo dev guarda todo en memoria y un reinicio borraría los secretos.
+
+  \item \textbf{Errores al pegar comandos.} En un momento pegamos código de \texttt{gateway.py} directamente en la terminal y salieron errores de \texttt{bash} (\texttt{syntax error near unexpected token}). No se escribió ningún archivo. Aprendimos a pegar solo los bloques \texttt{cat > archivo << 'EOF'}.
+\end{enumerate}
+
+%----------------------------------------------------------------
+\section{Matriz de pruebas}
+%----------------------------------------------------------------
+
+Ejecutamos las ocho pruebas de la sección 17 de la guía. Todas dieron el resultado esperado.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}cp{4.2cm}p{5.2cm}cc@{}}
+\toprule
+\textbf{N.} & \textbf{Prueba} & \textbf{Resultado esperado} & \textbf{Código} & \textbf{Obtenido} \\
+\midrule
+1 & Gateway sin token & Rechazada antes de llegar al backend & 401 & 401 \\
+2 & Gateway con token falso & Token rechazado por el Gateway & 401 & 401 \\
+3 & Gateway con token válido & Solicitud reenviada al backend & 200 & 200 \\
+4 & Acceso directo al backend sin secreto & Backend rechaza la petición & 403 & 403 \\
+5 & Vault apagado & Gateway no puede validar credenciales & 500 & 500 (controlado) \\
+6 & Backend apagado & Gateway detecta backend no disponible & 502 & 502 \\
+7 & Rotación del token en Vault & El token anterior deja de funcionar & 401/200 & 401/200 \\
+8 & Secreto interno incorrecto & Backend rechaza al Gateway & 403 & 403 \\
+\bottomrule
+\end{tabular}
+\caption{Matriz de pruebas del laboratorio.}
+\end{table}
+
+%----------------------------------------------------------------
+\section{Actividad de cierre: perfiles usuario y administrador}
+%----------------------------------------------------------------
+
+La actividad pide incorporar dos perfiles: \textbf{usuario}, que solo puede ejecutar \texttt{GET /products}, y \textbf{administrador}, que puede acceder a \texttt{/products} y \texttt{/orders}.
+
+\subsection{Implementación}
+
+\begin{itemize}
+  \item En Vault guardamos una tabla de clientes (\texttt{clients}) donde cada token está asociado a un \texttt{client\_id} y a un \texttt{role}, junto al \texttt{backend\_shared\_secret}:
+
+\begin{lstlisting}[language=bash]
+vault kv put secret/gateway \
+  backend_shared_secret="gateway-api-secret-456" \
+  clients='{"user-token-001":{"client_id":"user-client","role":"user"},
+  "admin-token-002":{"client_id":"admin-client","role":"admin"}}'
+\end{lstlisting}
+
+  \item En el Gateway agregamos una política de permisos por rol, que se evalúa después de autenticar al cliente:
+
+\begin{lstlisting}[language=python]
+PERMISSIONS = {
+    "user": {("GET", "products")},
+    "admin": {("GET", "products"), ("GET", "orders")},
+}
+\end{lstlisting}
+
+  \item El backend no cambió. Sigue recibiendo el secreto interno y, además, la identidad y el rol del cliente en los headers \texttt{X-Authenticated-Client} y \texttt{X-Client-Role}.
+\end{itemize}
+
+\subsection{Resultados de las pruebas}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llc@{}}
+\toprule
+\textbf{Solicitud} & \textbf{Token} & \textbf{Código} \\
+\midrule
+\texttt{GET /api/products} & (ninguno) & 401 \\
+\texttt{GET /api/products} & \texttt{falso} & 401 \\
+\texttt{GET /api/products} & \texttt{user-token-001} & 200 \\
+\texttt{GET /api/orders} & \texttt{user-token-001} & \textbf{403} \\
+\texttt{GET /api/products} & \texttt{admin-token-002} & 200 \\
+\texttt{GET /api/orders} & \texttt{admin-token-002} & 200 \\
+\bottomrule
+\end{tabular}
+\caption{Pruebas de autenticación y autorización con roles.}
+\end{table}
+
+La cuarta fila es la más importante: el usuario presenta un token \textbf{válido} y aun así recibe 403 en \texttt{/orders}. Eso demuestra que tener un token válido no significa poder hacer cualquier operación.
+
+\subsection{Justificación}
+
+\begin{enumerate}
+  \item \textbf{¿Qué información debe almacenarse en Vault?} La tabla de clientes, con el token, la identidad y el rol de cada uno, y el \texttt{backend\_shared\_secret}. Ninguna credencial queda en el código; el Gateway solo conoce el token con el que consulta Vault.
+
+  \item \textbf{¿Qué decisión toma el API Gateway?} Toma dos decisiones en orden. Primero autentica (¿quién eres?): busca el token entre los clientes de Vault y responde 401 si no existe. Después autoriza (¿qué puedes hacer?): revisa si el rol tiene permiso para ese método y esa ruta, y responde 403 si no lo tiene. Solo si ambas pasan enruta la petición al backend.
+
+  \item \textbf{¿Qué información se reenvía al backend?} El secreto interno (\texttt{X-Gateway-Secret}), la identidad del cliente (\texttt{X-Authenticated-Client}) y su rol (\texttt{X-Client-Role}). El token del cliente \textbf{no} se reenvía, por lo que el backend nunca lo conoce.
+
+  \item \textbf{¿Qué debe ocurrir si el token es válido pero no tiene el permiso requerido?} El Gateway rechaza la solicitud con 403 Forbidden sin contactar al backend. En nuestra prueba, el usuario pidió \texttt{/orders} y el rechazo lo hizo el propio Gateway.
+
+  \item \textbf{¿Qué código HTTP corresponde a cada escenario?}
+\end{enumerate}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Escenario} & \textbf{Código} \\
+\midrule
+Sin token & 401 \\
+Token inválido & 401 \\
+Token válido con permiso & 200 \\
+Token válido sin permiso & 403 \\
+Acceso directo al backend sin secreto & 403 \\
+Backend apagado & 502 \\
+Vault apagado & 500 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+En resumen: \textbf{401 = no autenticado} y \textbf{403 = autenticado pero no autorizado}.
+
+%----------------------------------------------------------------
+\section{Preguntas para discusión}
+%----------------------------------------------------------------
+
+\textbf{1. ¿Qué problema resuelve el API Gateway que no resuelve directamente la API de negocio?}
+
+Centraliza las políticas transversales (autenticación, autorización, enrutamiento y, en un sistema real, rate limiting y logging) en un solo punto de entrada. Sin Gateway, cada API tendría que implementar su propia validación de credenciales, con el riesgo de que unas lo hagan bien y otras no. En el laboratorio, el backend solo expone \texttt{/products} y \texttt{/orders}, y toda la seguridad vive en el Gateway. Además, el cliente no necesita conocer la ubicación real del backend.
+
+\textbf{2. ¿Por qué no conviene almacenar tokens y contraseñas directamente en el código fuente?}
+
+Porque el código se copia, se versiona y se comparte, y cualquiera que lo vea obtiene las credenciales. Además, cambiar un secreto obliga a modificar el código y volver a desplegar. En el Paso 12 rotamos el token en Vault y el Gateway pasó de aceptar \texttt{student-token-123} a rechazarlo con 401, sin tocar una sola línea de código.
+
+\textbf{3. ¿Qué diferencia existe entre el token del cliente y el secreto Gateway--Backend?}
+
+Son dos identidades distintas. El token del cliente responde a ``¿quién es este cliente frente al Gateway?'', y el secreto Gateway--Backend responde a ``¿quién es este servicio frente al backend?''. El cliente nunca debe conocer el segundo. Si se filtra un token de cliente, el atacante sigue sin poder hablar con el backend, y cada credencial puede rotarse por separado.
+
+\textbf{4. ¿Qué ocurre si un atacante puede acceder directamente al backend?}
+
+Se salta todos los controles del Gateway: autenticación, autorización, registro y límites de uso. Lo comprobamos en el Paso 2, cuando un \texttt{curl} directo al backend devolvió los datos sin ninguna credencial. Después del Paso 6 el backend devuelve 403 sin el secreto, pero si el atacante llega a conocerlo obtiene acceso completo.
+
+\textbf{5. ¿Por qué un firewall sigue siendo necesario aunque exista un secreto interno?}
+
+Porque un header HTTP se puede copiar o imitar, y el secreto puede filtrarse. En nuestra prueba, el contenedor atacante con el secreto correcto recibió 200 OK. Después de aplicar la regla en \texttt{DOCKER-USER}, su conexión quedó en timeout y el contador marcó 5 paquetes descartados. El firewall corta el acceso antes de que la petición llegue a la aplicación. Son capas independientes (defensa en profundidad): si falla una, la otra sigue protegiendo.
+
+\textbf{6. ¿Qué riesgo introduce utilizar un único token para todos los clientes?}
+
+No hay identidad individual, así que no se puede saber quién hizo cada petición ni revocar a un cliente sin cortar a todos. Tampoco se puede aplicar el principio de mínimo privilegio, y si el token se filtra el daño alcanza a todo el sistema. Por eso en la actividad de cierre cada cliente tiene su propio token y rol.
+
+\textbf{7. ¿Qué ventajas y costos tendría reemplazar el token estático por JWT?}
+
+\emph{Ventajas:} el JWT está firmado y lleva dentro la identidad, el rol y una fecha de expiración; el Gateway puede validarlo localmente sin consultar Vault en cada petición (en la prueba 5 vimos que un Vault caído deja al Gateway devolviendo 500); los tokens caducan solos; y es un estándar con librerías maduras.
+
+\emph{Costos:} hay que gestionar y rotar las claves de firma; revocar un token antes de que expire es difícil; aparecen validaciones nuevas (firma, emisor, audiencia, expiración, desfase de reloj); y los tokens son más grandes.
+
+\textbf{8. ¿Qué componentes cambiarían si la autenticación fuera delegada a un Identity Provider?}
+
+Aparecería un componente nuevo, el Identity Provider (por ejemplo con OAuth 2.0 / OpenID Connect), donde el cliente iniciaría sesión y de donde recibiría el token. El Gateway dejaría de comparar contra una tabla y pasaría a validar la firma del JWT con las claves públicas del proveedor, además de emisor, audiencia y expiración, y tomaría los roles o scopes de los claims del token. Vault dejaría de guardar la tabla de clientes, pero seguiría guardando el secreto Gateway--Backend. El backend casi no cambiaría.
+
+%----------------------------------------------------------------
+\section{Limitaciones}
+%----------------------------------------------------------------
+
+Como dice la guía, este diseño está intencionalmente simplificado y no debe considerarse un patrón de producción. Algunas limitaciones que notamos:
+
+\begin{itemize}[noitemsep]
+  \item Vault está en modo desarrollo, con token raíz conocido y datos en memoria.
+  \item Los tokens son estáticos y no expiran.
+  \item La comunicación es HTTP plano, sin TLS ni mTLS.
+  \item La política de permisos por rol está escrita en el código del Gateway; cambiarla exige editar el código y reiniciar.
+  \item La regla de firewall y el módulo \texttt{br\_netfilter} no son persistentes y se pierden al reiniciar.
+  \item No hay rate limiting ni logging estructurado.
+\end{itemize}
+
+En un sistema real habría que evolucionar hacia OAuth 2.0 / OpenID Connect, JWT firmado, un Identity Provider dedicado, credenciales de Vault con privilegio mínimo y renovación automática, TLS o mTLS, red privada segmentada, rate limiting, monitoreo y alertas.
+
+%----------------------------------------------------------------
+\section{Conclusiones}
+%----------------------------------------------------------------
+
+Con este laboratorio pudimos ver cómo un \textit{concern} de seguridad se transforma en decisiones arquitectónicas explícitas, mecanismos concretos y evidencia verificable:
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{2.6cm}p{11cm}@{}}
+\toprule
+\textbf{Concern} & Seguridad de acceso a APIs y protección de credenciales. \\
+\textbf{Decisiones} & Centralizar la autenticación en un Gateway; externalizar secretos a Vault; separar la identidad del cliente de la del servicio; impedir el acceso directo al backend; reenviar solo solicitudes autorizadas. \\
+\textbf{Mecanismos} & Bearer token, HashiCorp Vault, header interno Gateway--Backend, dependencias de FastAPI, HTTPX como proxy y firewall con \texttt{iptables}. \\
+\textbf{Evidencia} & Códigos 401, 403, 500 y 502; logs del Gateway y del backend; cambio de comportamiento al rotar un secreto; contador de paquetes descartados por el firewall. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Lo que más nos dejó claro es que autenticación, autorización, administración de secretos y aislamiento de red son mecanismos diferentes, y que ninguno reemplaza a los otros. Por ejemplo, el atacante con el secreto correcto solo se detuvo gracias al firewall, y el usuario con un token válido solo se detuvo gracias a la autorización por roles. Nuestro mayor aprendizaje práctico fue que los problemas ``de entorno'' (permisos de Docker, módulos del kernel, terminales ocupadas) consumen tanto tiempo como el código, y que conviene revisar los casos de falla (Vault caído, backend caído) y no solo el camino feliz.
+
+%----------------------------------------------------------------
+\appendix
+\section{Código final}
+%----------------------------------------------------------------
+
+\subsection{backend\_api.py (HOST B)}
+
+\begin{lstlisting}[language=python]
+import os
+import secrets
+from fastapi import FastAPI, Header, HTTPException, Depends
+
+app = FastAPI(title="Protected Backend API")
+
+INTERNAL_GATEWAY_SECRET = os.getenv("INTERNAL_GATEWAY_SECRET")
+
+if not INTERNAL_GATEWAY_SECRET:
+    raise RuntimeError("INTERNAL_GATEWAY_SECRET no esta configurado")
+
+def verify_gateway(x_gateway_secret: str = Header(default="")):
+    valid = secrets.compare_digest(
+        x_gateway_secret,
+        INTERNAL_GATEWAY_SECRET
+    )
+    if not valid:
+        raise HTTPException(
+            status_code=403,
+            detail="Solicitud no autorizada desde Gateway"
+        )
+
+@app.get("/health")
+def health():
+    return {"status": "OK"}
+
+@app.get("/products", dependencies=[Depends(verify_gateway)])
+def products(x_authenticated_client: str | None = Header(default=None)):
+    return {
+        "authenticated_client": x_authenticated_client,
+        "products": [
+            {"id": 1, "name": "Notebook", "price": 900000},
+            {"id": 2, "name": "Monitor", "price": 250000}
+        ]
+    }
+
+@app.get("/orders", dependencies=[Depends(verify_gateway)])
+def orders(x_authenticated_client: str | None = Header(default=None)):
+    return {
+        "authenticated_client": x_authenticated_client,
+        "orders": [
+            {"id": 1001, "status": "paid"},
+            {"id": 1002, "status": "pending"}
+        ]
+    }
+\end{lstlisting}
+
+\subsection{gateway.py (HOST A, versión final con roles)}
+
+\begin{lstlisting}[language=python]
+import os
+import json
+import secrets
+import httpx
+from fastapi import FastAPI, Depends, HTTPException, Request, Response
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+app = FastAPI(title="Secure Gateway con roles")
+security = HTTPBearer(auto_error=False)
+
+VAULT_ADDR = os.getenv("VAULT_ADDR", "http://127.0.0.1:8200")
+VAULT_TOKEN = os.getenv("VAULT_TOKEN")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://172.30.0.20:9000")
+
+if not VAULT_TOKEN:
+    raise RuntimeError("VAULT_TOKEN no configurado")
+
+# Politica de autorizacion: rol -> (metodo, ruta) permitidos
+PERMISSIONS = {
+    "user": {("GET", "products")},
+    "admin": {("GET", "products"), ("GET", "orders")},
+}
+
+async def get_gateway_secrets():
+    url = f"{VAULT_ADDR}/v1/secret/data/gateway"
+    headers = {"X-Vault-Token": VAULT_TOKEN}
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(url, headers=headers)
+    except httpx.RequestError:
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible acceder a Vault"
+        )
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible acceder a Vault"
+        )
+    return response.json()["data"]["data"]
+
+async def authenticate_client(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Bearer token requerido")
+    vault_secrets = await get_gateway_secrets()
+    clients = json.loads(vault_secrets["clients"])
+    received = credentials.credentials
+    match = None
+    for token, info in clients.items():
+        if secrets.compare_digest(received, token):
+            match = info
+    if match is None:
+        raise HTTPException(status_code=401, detail="Token invalido")
+    return {
+        "client_id": match["client_id"],
+        "role": match["role"],
+        "backend_secret": vault_secrets["backend_shared_secret"]
+    }
+
+@app.get("/health")
+def health():
+    return {"status": "OK", "service": "API Gateway"}
+
+@app.api_route(
+    "/api/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"]
+)
+async def proxy(
+    path: str,
+    request: Request,
+    auth=Depends(authenticate_client)
+):
+    allowed = PERMISSIONS.get(auth["role"], set())
+    if (request.method, path) not in allowed:
+        raise HTTPException(
+            status_code=403,
+            detail="Permiso insuficiente para este recurso"
+        )
+    target_url = f"{BACKEND_URL}/{path}"
+    body = await request.body()
+    gateway_headers = {
+        "X-Gateway-Secret": auth["backend_secret"],
+        "X-Authenticated-Client": auth["client_id"],
+        "X-Client-Role": auth["role"]
+    }
+    content_type = request.headers.get("content-type")
+    if content_type:
+        gateway_headers["content-type"] = content_type
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            upstream = await client.request(
+                method=request.method,
+                url=target_url,
+                params=request.query_params,
+                content=body,
+                headers=gateway_headers
+            )
+    except httpx.RequestError:
+        raise HTTPException(status_code=502, detail="Backend no disponible")
+    response_headers = {}
+    if "content-type" in upstream.headers:
+        response_headers["content-type"] = upstream.headers["content-type"]
+    return Response(
+        content=upstream.content,
+        status_code=upstream.status_code,
+        headers=response_headers
+    )
+\end{lstlisting}
+
+\end{document}

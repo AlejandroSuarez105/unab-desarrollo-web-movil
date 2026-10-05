@@ -1,84 +1,61 @@
-"""
-Backend API (HOST B)
-
-API de negocio protegida: solo acepta solicitudes que traigan el header
-X-Gateway-Secret con el secreto compartido con el API Gateway.
-
-El secreto se entrega por la variable de entorno INTERNAL_GATEWAY_SECRET.
-Si la variable no existe, la aplicacion se niega a arrancar.
-
-Ejecucion:
-    INTERNAL_GATEWAY_SECRET="gateway-api-secret-456" \
-    uvicorn backend_api:app --host 0.0.0.0 --port 9000
-"""
 import os
-import secrets
-from fastapi import (
-    FastAPI,
-    Header,
-    HTTPException,
-    Depends
-)
+from fastapi import FastAPI, Header, HTTPException
 
-app = FastAPI(title="Protected Backend API")
+app = FastAPI(title="Backend Items - Pizzería La Fornace")
 
-INTERNAL_GATEWAY_SECRET = os.getenv(
-    "INTERNAL_GATEWAY_SECRET"
-)
+GATEWAY_SECRET = os.getenv("GATEWAY_SECRET", "PizzeriaSecret123")
 
-if not INTERNAL_GATEWAY_SECRET:
-    raise RuntimeError(
-        "INTERNAL_GATEWAY_SECRET no esta configurado"
-    )
+MENU_ITEMS = {
+    "1": {"id": "1", "name": "Pizza Margherita", "category": "pizzas", "price": 12000, "ingredients": ["mozzarella", "tomate", "albahaca"]},
+    "2": {"id": "2", "name": "Pizza Quattro Formaggi", "category": "pizzas", "price": 14500, "ingredients": ["mozzarella", "gorgonzola", "parmesano", "provolone"]},
+    "3": {"id": "3", "name": "Calzone Napolitano", "category": "calzones", "price": 13000, "ingredients": ["jamón", "mozzarella", "tomate"]},
+    "4": {"id": "4", "name": "Fainá Tradicional", "category": "acompañamientos", "price": 3500, "ingredients": ["harina de garbanzo", "aceite de oliva"]}
+}
 
 
-def verify_gateway(
-    x_gateway_secret: str = Header(default="")
+@app.get("/items")
+def get_all_items(
+    x_gateway_secret: str = Header(default=None),
+    x_authenticated_user: str = Header(default=None),
+    x_authenticated_roles: str = Header(default=None),
+    x_authenticated_client: str = Header(default=None)
 ):
-    # compare_digest compara en tiempo constante
-    valid = secrets.compare_digest(
-        x_gateway_secret,
-        INTERNAL_GATEWAY_SECRET
-    )
-    if not valid:
-        raise HTTPException(
-            status_code=403,
-            detail="Solicitud no autorizada desde Gateway"
-        )
+    # Validar ZTA: Verificar que la llamada provenga del Gateway
+    if x_gateway_secret != GATEWAY_SECRET:
+        raise HTTPException(status_code=403, detail="Acceso no autorizado: requiere transmisión desde Gateway autorizado")
 
-
-@app.get("/health")
-def health():
-    return {"status": "OK"}
-
-
-@app.get(
-    "/products",
-    dependencies=[Depends(verify_gateway)]
-)
-def products(
-    x_authenticated_client: str | None = Header(default=None)
-):
     return {
-        "authenticated_client": x_authenticated_client,
-        "products": [
-            {"id": 1, "name": "Notebook", "price": 900000},
-            {"id": 2, "name": "Monitor", "price": 250000}
-        ]
+        "identity": {
+            "client_id": x_authenticated_client,
+            "username": x_authenticated_user,
+            "roles": x_authenticated_roles.split(",") if x_authenticated_roles else []
+        },
+        "restaurant": "Pizzería La Fornace",
+        "total_items": len(MENU_ITEMS),
+        "items": list(MENU_ITEMS.values())
     }
 
 
-@app.get(
-    "/orders",
-    dependencies=[Depends(verify_gateway)]
-)
-def orders(
-    x_authenticated_client: str | None = Header(default=None)
+@app.get("/items/{item_id}")
+def get_item_by_id(
+    item_id: str,
+    x_gateway_secret: str = Header(default=None),
+    x_authenticated_user: str = Header(default=None),
+    x_authenticated_roles: str = Header(default=None),
+    x_authenticated_client: str = Header(default=None)
 ):
+    if x_gateway_secret != GATEWAY_SECRET:
+        raise HTTPException(status_code=403, detail="Acceso no autorizado al backend de Pizzería La Fornace")
+
+    item = MENU_ITEMS.get(item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Ítem de menú no encontrado")
+
     return {
-        "authenticated_client": x_authenticated_client,
-        "orders": [
-            {"id": 1001, "status": "paid"},
-            {"id": 1002, "status": "pending"}
-        ]
+        "identity": {
+            "client_id": x_authenticated_client,
+            "username": x_authenticated_user,
+            "roles": x_authenticated_roles.split(",") if x_authenticated_roles else []
+        },
+        "item": item
     }

@@ -1,0 +1,45 @@
+{
+ "suite": "fallos_F1_F2_F3_F4_F6_F7",
+ "ejecutado": "2026-11-08T22:04:06Z",
+ "segundos": 61.2,
+ "total": 6,
+ "ok": 6,
+ "casos": [
+  {
+   "id": "F1",
+   "descripcion": "Inventory detenido durante la creacion de pedidos: 503 controlado, sin pedidos a medias, vuelve a 201",
+   "estado": "OK",
+   "observado": "{\"detenido_en_s\": 5.8, \"reiniciado_en_s\": 20.9, \"respuestas_durante_la_caida\": [[503, \"INVENTARIO_NO_DISPONIBLE\"]], \"pedidos_sin_reserva\": 0, \"segundos_hasta_el_primer_201\": 0.1}"
+  },
+  {
+   "id": "F2",
+   "descripcion": "Broker detenido durante un pago: pedido pagado con despachoPublicado en falso; al reiniciar la orden llega una sola vez",
+   "estado": "OK",
+   "observado": "{\"estado_con_broker_caido\": \"pagado\", \"despachoPublicado_con_broker_caido\": false, \"segundos_tras_reiniciar_hasta_dispatch\": 1.0, \"ordenes_en_dispatch\": 1, \"despachoPublicado_final\": true, \"objetivo_del_plan_s\": 30}"
+  },
+  {
+   "id": "F3",
+   "descripcion": "Dispatch reiniciado con 21 mensajes pendientes (uno repetido): reconecta, consume y no duplica ordenes",
+   "estado": "OK",
+   "observado": "{\"ordenes_antes_del_reinicio\": 0, \"ordenes_despues\": 20, \"duplicadas\": 0, \"segundos_hasta_consumir\": 0.0}"
+  },
+  {
+   "id": "F4",
+   "descripcion": "Orders sin responder mas de 5 s durante el aviso: el aviso se registra, el pago queda aprobado sin confirmar y el pedido pasa a pagado al normalizarse",
+   "estado": "OK",
+   "observado": "{\"respuesta_del_aviso\": 200, \"pago_durante_la_demora\": \"aprobado\", \"confirmadoEnPedidos_durante_la_demora\": false, \"segundos_hasta_pagado_tras_reanudar_orders\": 0.0}"
+  },
+  {
+   "id": "F6",
+   "descripcion": "Auth detenido: el catalogo y el aviso de pago siguen; las rutas con token responden 503",
+   "estado": "OK",
+   "observado": "{\"catalogo\": 200, \"aviso_de_pago\": 200, \"ruta_con_token\": 503, \"codigo\": \"AUTENTICACION_NO_DISPONIBLE\", \"pedido_pagado_despues\": true}"
+  },
+  {
+   "id": "F7",
+   "descripcion": "Pasarela sin respuesta: S20 502/503 sin guardar pago. Correo sin respuesta: boleta con correoEnviado en falso y reintento",
+   "estado": "OK",
+   "observado": "{\"S20_con_pasarela_caida\": 503, \"codigo\": \"PASARELA_NO_DISPONIBLE\", \"pagos_guardados\": 0, \"correoEnviado_con_correo_caido\": false, \"segundos_hasta_reintento_exitoso\": 0.0, \"intervalo_de_reintento_de_la_prueba_s\": 10, \"intervalo_del_plan_s\": 300}"
+  }
+ ]
+}

@@ -1,0 +1,447 @@
+{
+ "suite": "negocio",
+ "ejecutado": "2026-11-08T21:58:23Z",
+ "segundos": 15.6,
+ "total": 73,
+ "ok": 73,
+ "casos": [
+  {
+   "id": "CT-S01-P",
+   "descripcion": "S01: login valido: 200 con token",
+   "estado": "OK",
+   "observado": "200 claves=['access_token', 'expires_in', 'nombre', 'rol', 'token_type']"
+  },
+  {
+   "id": "CT-S01-N",
+   "descripcion": "S01: contrasena incorrecta: 401 CREDENCIALES_INVALIDAS",
+   "estado": "OK",
+   "observado": "401 CREDENCIALES_INVALIDAS"
+  },
+  {
+   "id": "CT-S02-P",
+   "descripcion": "S02: logout: 204",
+   "estado": "OK",
+   "observado": "204"
+  },
+  {
+   "id": "CT-S02-N",
+   "descripcion": "S02: el token cerrado ya no sirve: 401",
+   "estado": "OK",
+   "observado": "401"
+  },
+  {
+   "id": "CT-S03-P",
+   "descripcion": "S03: registro valido: 201 pendiente_verificacion",
+   "estado": "OK",
+   "observado": "201 pendiente_verificacion"
+  },
+  {
+   "id": "CT-S03-N",
+   "descripcion": "S03: RUN repetido 409 y RUN invalido 400",
+   "estado": "OK",
+   "observado": "repetido=409 RUN_DUPLICADO, invalido=400"
+  },
+  {
+   "id": "CT-S04-P",
+   "descripcion": "S04: verificacion con el enlace del correo: 200",
+   "estado": "OK",
+   "observado": "200"
+  },
+  {
+   "id": "CT-S04-N",
+   "descripcion": "S04: el mismo enlace por segunda vez: 410",
+   "estado": "OK",
+   "observado": "410 TOKEN_VENCIDO"
+  },
+  {
+   "id": "CT-S05-P",
+   "descripcion": "S05: correo existente o no: siempre 202 (no revela cuentas)",
+   "estado": "OK",
+   "observado": "inexistente=202, existente(ya verificado)=202"
+  },
+  {
+   "id": "CT-S05-N",
+   "descripcion": "S05: correo mal formado: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S06-P",
+   "descripcion": "S06: catalogo por categoria: 200 solo premium",
+   "estado": "OK",
+   "observado": "200 3 productos"
+  },
+  {
+   "id": "CT-S06-N",
+   "descripcion": "S06: categoria invalida: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S07-P",
+   "descripcion": "S07: administrador ve stock y retirados: 200",
+   "estado": "OK",
+   "observado": "200 12 productos"
+  },
+  {
+   "id": "CT-S07-N",
+   "descripcion": "S07: cajero_virtual: 403",
+   "estado": "OK",
+   "observado": "403"
+  },
+  {
+   "id": "CT-S08-P",
+   "descripcion": "S08: dueno crea producto: 201",
+   "estado": "OK",
+   "observado": "201 prod_013"
+  },
+  {
+   "id": "CT-S08-N",
+   "descripcion": "S08: nombre repetido 409 y precio negativo 400",
+   "estado": "OK",
+   "observado": "409, 400"
+  },
+  {
+   "id": "CT-S09-P",
+   "descripcion": "S09: modificar precio: 200",
+   "estado": "OK",
+   "observado": "200 precio=10990"
+  },
+  {
+   "id": "CT-S09-N",
+   "descripcion": "S09: producto inexistente: 404",
+   "estado": "OK",
+   "observado": "404"
+  },
+  {
+   "id": "CT-S11-P",
+   "descripcion": "S11: stock 0 deja el producto no disponible",
+   "estado": "OK",
+   "observado": "200 {'id': 'prod_013', 'stock': 0, 'disponible': False}"
+  },
+  {
+   "id": "CT-S11-N",
+   "descripcion": "S11: stock negativo: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S10-P",
+   "descripcion": "S10: retirar producto: 204 y desaparece del catalogo publico",
+   "estado": "OK",
+   "observado": "204, en catalogo=False"
+  },
+  {
+   "id": "CT-S10-N",
+   "descripcion": "S10: producto inexistente: 404",
+   "estado": "OK",
+   "observado": "404"
+  },
+  {
+   "id": "CT-S12-P",
+   "descripcion": "S12: pedido valido: 201 pendiente_pago; misma Idempotency-Key devuelve el mismo pedido",
+   "estado": "OK",
+   "observado": "201 ped_0007; repetido -> ped_0007"
+  },
+  {
+   "id": "CT-S12-N",
+   "descripcion": "S12: fuera de cobertura 422 y cantidad invalida 400",
+   "estado": "OK",
+   "observado": "422 FUERA_DE_COBERTURA, 400"
+  },
+  {
+   "id": "CT-S13-P",
+   "descripcion": "S13: mis pedidos: 200 y contiene el pedido",
+   "estado": "OK",
+   "observado": "200 1 pedidos"
+  },
+  {
+   "id": "CT-S13-N",
+   "descripcion": "S13: filtro de estado invalido: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S14-P",
+   "descripcion": "S14: detalle del pedido propio: 200",
+   "estado": "OK",
+   "observado": "200"
+  },
+  {
+   "id": "CT-S14-N",
+   "descripcion": "S14: pedido inexistente: 404",
+   "estado": "OK",
+   "observado": "404"
+  },
+  {
+   "id": "CT-S15-P",
+   "descripcion": "S15: anular pedido pendiente: 200 anulado y el stock se libera",
+   "estado": "OK",
+   "observado": "200; stock prod_004 inicial=30, reservado=28, liberado=30"
+  },
+  {
+   "id": "CT-S15-N",
+   "descripcion": "S15: motivo corto 400; anular dos veces 409",
+   "estado": "OK",
+   "observado": "400, 409 TRANSICION_INVALIDA"
+  },
+  {
+   "id": "CT-S16-P",
+   "descripcion": "S16: cajero lista pedidos pagados: 200 con el pedido",
+   "estado": "OK",
+   "observado": "200 3"
+  },
+  {
+   "id": "CT-S16-N",
+   "descripcion": "S16: fecha invalida: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S18-P",
+   "descripcion": "S18: la orden llega a la cola de despacho por el broker",
+   "estado": "OK",
+   "observado": "orden OD-000004"
+  },
+  {
+   "id": "CT-S18-N",
+   "descripcion": "S18: filtro invalido 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S19-P",
+   "descripcion": "S19: imprimir orden: HTML con el pedido y queda impresa",
+   "estado": "OK",
+   "observado": "200 html=432 bytes, impresa=True"
+  },
+  {
+   "id": "CT-S19-N",
+   "descripcion": "S19: orden inexistente: 404",
+   "estado": "OK",
+   "observado": "404"
+  },
+  {
+   "id": "CT-S17-P",
+   "descripcion": "S17: pagado -> en_preparacion -> en_despacho -> entregado; el administrador anula con motivo",
+   "estado": "OK",
+   "observado": "[200, 200, 200]; anulacion=200"
+  },
+  {
+   "id": "CT-S17-N",
+   "descripcion": "S17: retroceder el estado: 409 TRANSICION_INVALIDA",
+   "estado": "OK",
+   "observado": "409 TRANSICION_INVALIDA"
+  },
+  {
+   "id": "CT-S20-P",
+   "descripcion": "S20: iniciar pago: 201 con urlPago de la pasarela de prueba",
+   "estado": "OK",
+   "observado": "201 estado=pendiente"
+  },
+  {
+   "id": "CT-S20-N",
+   "descripcion": "S20: medio invalido 400; pedido ya pagado 409",
+   "estado": "OK",
+   "observado": "400, 409 PEDIDO_NO_PAGABLE"
+  },
+  {
+   "id": "CT-S22-P",
+   "descripcion": "S22: cajero consulta ventas: 200 con la venta del pedido",
+   "estado": "OK",
+   "observado": "200 5 ventas"
+  },
+  {
+   "id": "CT-S22-N",
+   "descripcion": "S22: fecha invalida 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S23-P",
+   "descripcion": "S23: cliente obtiene su boleta: 200 con numero B-",
+   "estado": "OK",
+   "observado": "200 B-000004 total=19480 iva=3110"
+  },
+  {
+   "id": "CT-S23-N",
+   "descripcion": "S23: pedido no pagado 409; encargado_despachos 403",
+   "estado": "OK",
+   "observado": "409 PEDIDO_NO_PAGADO, 403"
+  },
+  {
+   "id": "CT-S34-P",
+   "descripcion": "S34: reporte de ventas del dueno: 200 con totales y maximo 10 productos",
+   "estado": "OK",
+   "observado": "200 ventas=5 total=51440"
+  },
+  {
+   "id": "CT-S34-N",
+   "descripcion": "S34: rango de mas de 92 dias: 400",
+   "estado": "OK",
+   "observado": "400 RANGO_INVALIDO"
+  },
+  {
+   "id": "CT-S24-P",
+   "descripcion": "S24: perfil propio: 200 con RUN y direccion",
+   "estado": "OK",
+   "observado": "200"
+  },
+  {
+   "id": "CT-S24-N",
+   "descripcion": "S24: un administrador no tiene perfil de cliente: 403",
+   "estado": "OK",
+   "observado": "403"
+  },
+  {
+   "id": "CT-S25-P",
+   "descripcion": "S25: cambiar telefono: 200",
+   "estado": "OK",
+   "observado": "200"
+  },
+  {
+   "id": "CT-S25-N",
+   "descripcion": "S25: telefono invalido: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S26-P",
+   "descripcion": "S26: administrador crea cliente: 201",
+   "estado": "OK",
+   "observado": "201 cli_0012"
+  },
+  {
+   "id": "CT-S26-N",
+   "descripcion": "S26: RUN repetido 409; cajero 403",
+   "estado": "OK",
+   "observado": "409, 403"
+  },
+  {
+   "id": "CT-S27-P",
+   "descripcion": "S27: buscar cliente por nombre: 200",
+   "estado": "OK",
+   "observado": "200 1 resultados"
+  },
+  {
+   "id": "CT-S27-N",
+   "descripcion": "S27: limit fuera de rango: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S28-P",
+   "descripcion": "S28: modificar cliente: 200",
+   "estado": "OK",
+   "observado": "200"
+  },
+  {
+   "id": "CT-S28-N",
+   "descripcion": "S28: cliente inexistente: 404",
+   "estado": "OK",
+   "observado": "404"
+  },
+  {
+   "id": "CT-S29-P",
+   "descripcion": "S29: baja de cliente: 204",
+   "estado": "OK",
+   "observado": "204"
+  },
+  {
+   "id": "CT-S29-N",
+   "descripcion": "S29: cliente inexistente: 404",
+   "estado": "OK",
+   "observado": "404"
+  },
+  {
+   "id": "CT-S30-P",
+   "descripcion": "S30: crear usuario de personal: 201 pendiente y llega el correo de activacion",
+   "estado": "OK",
+   "observado": "201 usr_0006 rol=cajero_virtual estado=pendiente_verificacion"
+  },
+  {
+   "id": "CT-S30-N",
+   "descripcion": "S30: correo repetido 409; rol cliente 400",
+   "estado": "OK",
+   "observado": "409, 400"
+  },
+  {
+   "id": "CT-S31-P",
+   "descripcion": "S31: listar por rol: 200 con el usuario",
+   "estado": "OK",
+   "observado": "200 2"
+  },
+  {
+   "id": "CT-S31-N",
+   "descripcion": "S31: rol invalido: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "CT-S32-P",
+   "descripcion": "S32: cambiar rol: 200",
+   "estado": "OK",
+   "observado": "200 rol=encargado_despachos"
+  },
+  {
+   "id": "CT-S32-N",
+   "descripcion": "S32: usuario inexistente: 404",
+   "estado": "OK",
+   "observado": "404"
+  },
+  {
+   "id": "CT-S33-P",
+   "descripcion": "S33: baja de usuario: 204",
+   "estado": "OK",
+   "observado": "204"
+  },
+  {
+   "id": "CT-S33-N",
+   "descripcion": "S33: usuario inexistente: 404",
+   "estado": "OK",
+   "observado": "404"
+  },
+  {
+   "id": "CT-S35-P",
+   "descripcion": "S35: mensaje de contacto: 201 con id msg_",
+   "estado": "OK",
+   "observado": "201 msg_0001"
+  },
+  {
+   "id": "CT-S35-N",
+   "descripcion": "S35: motivo fuera de la lista: 400",
+   "estado": "OK",
+   "observado": "400"
+  },
+  {
+   "id": "FL-01",
+   "descripcion": "Compra completa: pedido -> pago por la pasarela de prueba -> pagado -> venta y boleta -> correo con boleta -> orden de despacho -> stock descontado",
+   "estado": "OK",
+   "observado": "estado pagado=True, correo de boleta=True, orden=OD-000006, stock prod_007 200 -> 198"
+  },
+  {
+   "id": "FL-02",
+   "descripcion": "Consulta de pedido: el dueno recibe 200 y otra cuenta 404 identico al inexistente (misma regla C1 en S14)",
+   "estado": "OK",
+   "observado": "dueno=200, otra cuenta=404 NO_ENCONTRADO, inexistente=404"
+  },
+  {
+   "id": "FL-03",
+   "descripcion": "Stock insuficiente: pedir 2 con stock 1 da 409 STOCK_INSUFICIENTE; el ultimo se reserva una sola vez",
+   "estado": "OK",
+   "observado": "409 SIN_STOCK, 201, 409 SIN_STOCK"
+  },
+  {
+   "id": "FL-04",
+   "descripcion": "Pedido sin pago vencido (vigencia de prueba de 4 s): pasa a anulado, libera el stock y ya no se puede pagar",
+   "estado": "OK",
+   "observado": "anulado=True, stock reservado=49 -> liberado=50, pago=409 PEDIDO_NO_PAGABLE"
+  },
+  {
+   "id": "FL-05",
+   "descripcion": "Servidor de correo de prueba detenido al pagar: la venta existe, el pedido queda pagado y la boleta queda pendiente de reintento",
+   "estado": "OK",
+   "observado": "venta=True, correoEnviado=False, intentos=0, pedido=pagado"
+  }
+ ]
+}

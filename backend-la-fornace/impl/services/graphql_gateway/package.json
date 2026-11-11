@@ -1,0 +1,22 @@
+{
+  "name": "graphql-pizzeria",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GraphQL Gateway de La Fornace: solo lectura, agrega orders, inventory y clients",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@apollo/server": "5.5.1",
+    "@as-integrations/express4": "1.1.2",
+    "@graphql-tools/schema": "10.1.5",
+    "dataloader": "2.2.3",
+    "express": "4.22.3",
+    "graphql": "16.11.0"
+  },
+  "type": "module"
+}

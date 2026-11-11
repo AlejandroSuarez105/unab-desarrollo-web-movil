@@ -1,0 +1,32 @@
+@startuml diagrama-10-2-consulta-pedido
+title Diagrama 10.2 - Consulta de pedido: ejecucion autorizada y denegada (misma regla C1)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam sequenceMessageAlign center
+skinparam ArrowColor #333333
+
+actor "Cliente A\n(duena del pedido)" as A
+actor "Cliente B\n(otra cuenta)" as B
+participant "api-gateway" as GW
+participant "auth-service" as AU
+participant "orders-service\nregla C1: pedido.cuentaId = identidad" as OR
+
+== Ejecucion autorizada (T-AUT-02, FL-02) ==
+A -> GW : GET /orders/{id} + token de A
+GW -> AU : introspeccion (I01)
+AU --> GW : cuentaId de A, rol cliente
+GW -> OR : identidad verificada de A
+OR --> GW : 200 con el pedido
+GW --> A : 200
+
+== Ejecucion denegada (T-AUT-01, T-DAT-04, T-GQL-05) ==
+B -> GW : GET /orders/{id} + token de B
+GW -> AU : introspeccion (I01)
+AU --> GW : cuentaId de B, rol cliente
+GW -> OR : identidad verificada de B
+OR --> GW : 404 NO_ENCONTRADO (igual al de un pedido inexistente)
+GW --> B : 404 sin datos de A
+@enduml

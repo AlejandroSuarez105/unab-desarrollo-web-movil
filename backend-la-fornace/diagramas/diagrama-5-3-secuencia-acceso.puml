@@ -1,0 +1,60 @@
+@startuml diagrama-5-3-secuencia-acceso
+title Diagrama 5.3 - Solicitud autorizada y solicitudes denegadas
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam sequenceMessageAlign left
+autonumber
+
+actor "Cliente A\n(dueno del pedido)" as A
+actor "Cliente B" as B
+participant "API Gateway" as GW
+participant "Auth Service" as AUTH
+participant "Vault" as V
+participant "orders-service" as ORD
+
+== Caso 1: solicitud autorizada (S14, pedido propio) ==
+A -> GW : GET /api/v1/orders/ped_0001\nAuthorization: Bearer <token A>
+GW -> GW : ruta y verbo en la lista permitida\nlimite de solicitudes por cuenta
+GW -> AUTH : I01 introspeccion del token
+AUTH --> GW : {active, cuentaId: cta_A, roles: [cliente]}
+GW -> GW : rol cliente permitido en esta ruta
+GW -> V : secreto gateway-to-orders (con cache corto)
+V --> GW : secreto
+GW -> ORD : GET /orders/ped_0001\nX-Gateway-Secret, X-Authenticated-User: cta_A,\nX-Authenticated-Roles: cliente, X-Request-Id
+ORD -> ORD : valida X-Gateway-Secret y rol\nbusca {id: ped_0001, cuentaId: cta_A}
+ORD --> GW : 200 pedido (DTO del cliente)
+GW --> A : 200 (con el mismo cuerpo)
+
+== Caso 2: denegada en el gateway (ruta administrativa) ==
+A -> GW : GET /api/v1/admin/orders\nAuthorization: Bearer <token A>\nX-Authenticated-Roles: administrador (forjada)
+GW -> GW : descarta cualquier cabecera X-Authenticated-*
+GW -> AUTH : I01 introspeccion
+AUTH --> GW : {active, cuentaId: cta_A, roles: [cliente]}
+GW -> GW : rol cliente no esta en ROLES-PEDIDOS-PERSONAL
+GW --> A : 403 {error: {codigo, mensaje, requestId}}
+note right of GW
+  La solicitud no llega a orders-service.
+  Sin token, la respuesta seria 401.
+end note
+
+== Caso 3: denegada en el sistema (pedido de otra cuenta) ==
+B -> GW : GET /api/v1/orders/ped_0001\nAuthorization: Bearer <token B>
+GW -> AUTH : I01 introspeccion
+AUTH --> GW : {active, cuentaId: cta_B, roles: [cliente]}
+GW -> ORD : GET /orders/ped_0001\nX-Gateway-Secret, X-Authenticated-User: cta_B,\nX-Authenticated-Roles: cliente
+ORD -> ORD : busca {id: ped_0001, cuentaId: cta_B}\nno hay coincidencia
+ORD --> GW : 404 {error: {codigo: NO_ENCONTRADO}}
+GW --> B : 404 (igual que un pedido inexistente)
+
+== Caso 4: acceso directo al sistema interno ==
+B -> ORD : GET https://orders-service/orders/ped_0001
+note over B, ORD
+  Desde Internet no hay ruta de red hacia orders-service.
+  Desde otro contenedor de la red privada, sin X-Gateway-Secret o con un
+  secreto que no es el de orders, responde 401. Con el secreto pero sin
+  identidad verificada tambien responde 401.
+end note
+@enduml

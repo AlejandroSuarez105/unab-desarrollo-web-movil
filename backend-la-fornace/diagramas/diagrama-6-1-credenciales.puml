@@ -1,0 +1,90 @@
+@startuml diagrama-6-1-credenciales
+title Diagrama 6.1 - Credenciales por tramo (solo referencias, nunca valores)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam ranksep 70
+skinparam nodesep 40
+skinparam componentStyle rectangle
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #444444
+}
+skinparam database {
+  BackgroundColor #FFF8E1
+  BorderColor #8D6E00
+}
+skinparam cloud {
+  BackgroundColor #F2F2F2
+  BorderColor #666666
+}
+skinparam ArrowColor #333333
+skinparam ArrowFontSize 11
+
+component "Navegador" as NAV
+cloud "Plataforma de pago\n(externa)" as PAY
+cloud "Proveedor de correo\n(externo)" as MAIL
+
+component "API Gateway" as GW
+
+rectangle "Red privada" #EAF2F8 {
+  component "auth" as AUTH
+  component "clients" as CLI
+  component "inventory" as INV
+  component "orders" as ORD
+  component "payments" as PMT
+  component "notifications" as NOT
+  component "dispatch" as DIS
+  component "GraphQL Gateway" as GQL
+}
+
+database "Vault\nsecret/data/..." as VLT
+queue "ActiveMQ\n/queue/cola_pedidos" as AMQ
+database "MongoDB\nuna base y un usuario\npor sistema" as DB
+
+NAV --> GW : Bearer (credencial del usuario)
+PAY --> GW : X-Signature\npayments-webhook-secret
+
+GW --> AUTH : I01 gateway-introspect\nruta gateway-to-auth
+GW --> CLI : gateway-to-clients
+GW --> INV : gateway-to-inventory
+GW --> ORD : gateway-to-orders
+GW --> PMT : gateway-to-payments
+GW --> NOT : gateway-to-notifications
+GW --> DIS : gateway-to-dispatch
+GW --> GQL : gateway-to-graphql
+
+GQL --> ORD : graphql-to-orders
+GQL --> INV : graphql-to-inventory
+GQL --> CLI : graphql-to-clients
+
+CLI --> AUTH : clients-to-auth
+AUTH --> NOT : auth-to-notifications
+ORD --> CLI : orders-to-clients
+ORD --> INV : orders-to-inventory
+PMT --> ORD : payments-to-orders
+PMT --> NOT : payments-to-notifications
+
+ORD --> AMQ : activemq-orders-writer
+DIS <-- AMQ : activemq-dispatch-reader
+
+PMT --> PAY : payments-provider-key
+NOT --> MAIL : mail-provider-key
+
+GW ..> VLT : vault-token-<componente>\n(solo lectura, uno por componente)
+ORD ..> DB : db-<sistema>\n(cada sistema usa solo la suya)
+
+note bottom of VLT
+Todos los componentes leen sus secretos de Vault
+con su propio token de solo lectura.
+Ninguna flecha de esta lista lleva el valor del secreto.
+end note
+
+legend right
+  linea continua: llamada con credencial
+  linea punteada: acceso a infraestructura
+  TLS en todos los tramos HTTP (CA del proyecto)
+endlegend
+@enduml

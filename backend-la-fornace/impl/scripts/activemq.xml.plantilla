@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+  <broker xmlns="http://activemq.apache.org/schema/core" brokerName="fornace"
+          dataDirectory="@@DIR_DATOS@@" useJmx="false" persistent="true">
+    <plugins>
+      <simpleAuthenticationPlugin anonymousAccessAllowed="false">
+        <users>
+          <authenticationUser username="@@USUARIO_ORDERS@@" password="@@CLAVE_ORDERS@@" groups="orders"/>
+          <authenticationUser username="@@USUARIO_DISPATCH@@" password="@@CLAVE_DISPATCH@@" groups="dispatch"/>
+        </users>
+      </simpleAuthenticationPlugin>
+      <authorizationPlugin>
+        <map>
+          <authorizationMap>
+            <authorizationEntries>
+              <authorizationEntry queue="cola_pedidos" write="orders" read="dispatch" admin="orders,dispatch"/>
+              <authorizationEntry topic="ActiveMQ.Advisory.>" read="orders,dispatch" write="orders,dispatch" admin="orders,dispatch"/>
+            </authorizationEntries>
+          </authorizationMap>
+        </map>
+      </authorizationPlugin>
+    </plugins>
+    <persistenceAdapter>
+      <kahaDB directory="@@DIR_DATOS@@/kahadb"/>
+    </persistenceAdapter>
+    <systemUsage>
+      <systemUsage>
+        <memoryUsage><memoryUsage percentOfJvmHeap="70"/></memoryUsage>
+        <storeUsage><storeUsage limit="1 gb"/></storeUsage>
+        <tempUsage><tempUsage limit="1 gb"/></tempUsage>
+      </systemUsage>
+    </systemUsage>
+    <transportConnectors>
+      <transportConnector name="stomp" uri="stomp://0.0.0.0:61613?maximumConnections=100&amp;wireFormat.maxFrameSize=1048576"/>
+    </transportConnectors>
+  </broker>
+</beans>

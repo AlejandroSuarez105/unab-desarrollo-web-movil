@@ -1,0 +1,516 @@
+/* ==========================================================================
+   Pizzeria La Fornace — hoja de estilos
+   Paleta (definida por el equipo):
+     --negro   #121212  fondo general
+     --rojo    #E64A19  acento principal / CTAs criticos
+     --amarillo#FFB300  precios, ofertas, valoracion
+     --verde   #388E3C  delivery gratis / confirmaciones
+     --blanco  #FFFFFF  contraste / texto
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  --negro: #121212;
+  --negro-suave: #1c1c1c;
+  --negro-tarjeta: #1a1a1a;
+  --rojo: #e64a19;
+  --rojo-oscuro: #b83a13;
+  --amarillo: #ffb300;
+  --verde: #388e3c;
+  --blanco: #ffffff;
+  --gris-texto: #b9b3ad;
+  --borde: #2c2c2c;
+
+  --fuente-display: "Anton", "Arial Narrow", sans-serif;
+  --fuente-cuerpo: "Work Sans", system-ui, sans-serif;
+
+  --radio: 10px;
+  --sombra: 0 18px 40px -20px rgba(0, 0, 0, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-cuerpo);
+  margin: 0;
+  padding-top: 76px;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+h1, h2, h3, .titulo-display {
+  font-family: var(--fuente-display);
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  text-transform: none;
+}
+
+.texto-muted {
+  color: var(--gris-texto);
+}
+
+.contenedor-angosto {
+  max-width: 720px;
+}
+
+/* ---------- Navbar ---------- */
+.navbar-fornace {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background-color: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--borde);
+}
+
+.navbar-fornace .navbar-brand {
+  font-family: var(--fuente-display);
+  font-size: 1.5rem;
+  color: var(--blanco);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-fornace .navbar-brand .llama {
+  color: var(--rojo);
+}
+
+.navbar-fornace .nav-link {
+  color: var(--blanco);
+  font-weight: 500;
+  padding: 0.5rem 0.9rem !important;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.navbar-fornace .nav-link.active {
+  color: var(--amarillo);
+}
+
+.navbar-fornace .nav-link:hover {
+  background-color: var(--negro-suave);
+  color: var(--amarillo);
+}
+
+.icono-boton {
+  background: transparent;
+  border: 1px solid var(--borde);
+  color: var(--blanco);
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.icono-boton:hover {
+  border-color: var(--rojo);
+  color: var(--amarillo);
+}
+
+.badge-carrito {
+  background-color: var(--rojo);
+  color: var(--blanco);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  margin-left: 0.35rem;
+  min-width: 1.2rem;
+  text-align: center;
+  display: inline-block;
+}
+
+/* ---------- Botones ---------- */
+.btn-fornace {
+  background-color: var(--rojo);
+  border-color: var(--rojo);
+  color: var(--blanco);
+  font-weight: 600;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  transition: transform 0.12s ease, background-color 0.15s ease;
+}
+
+.btn-fornace:hover {
+  background-color: var(--rojo-oscuro);
+  border-color: var(--rojo-oscuro);
+  color: var(--blanco);
+  transform: translateY(-1px);
+}
+
+.btn-fornace-outline {
+  background-color: transparent;
+  border: 2px solid var(--blanco);
+  color: var(--blanco);
+  font-weight: 600;
+  padding: 0.55rem 1.3rem;
+  border-radius: 8px;
+}
+
+.btn-fornace-outline:hover {
+  border-color: var(--amarillo);
+  color: var(--amarillo);
+}
+
+/* ---------- Hero / Carrusel ---------- */
+.hero-carrusel .carousel-item {
+  height: 62vh;
+  min-height: 380px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.hero-carrusel .carousel-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(18, 18, 18, 0.25) 0%, rgba(18, 18, 18, 0.92) 92%);
+}
+
+.hero-carrusel .carousel-caption {
+  z-index: 2;
+  text-align: left;
+  left: 6%;
+  right: 6%;
+  bottom: 8%;
+}
+
+.hero-carrusel .carousel-caption .eyebrow {
+  color: var(--amarillo);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
+}
+
+.hero-carrusel .carousel-caption h2 {
+  font-size: clamp(2.1rem, 6vw, 3.6rem);
+  margin-bottom: 0.6rem;
+}
+
+.hero-carrusel .carousel-indicators [data-bs-target] {
+  background-color: var(--blanco);
+  opacity: 0.4;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.hero-carrusel .carousel-indicators .active {
+  opacity: 1;
+  background-color: var(--rojo);
+}
+
+.hero-carrusel .carousel-control-prev,
+.hero-carrusel .carousel-control-next {
+  width: 6%;
+}
+
+/* ---------- Secciones ---------- */
+.seccion {
+  padding: 3.5rem 0;
+}
+
+.seccion-titulo {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin-bottom: 0.4rem;
+}
+
+.franja-verde {
+  background-color: var(--verde);
+  color: var(--blanco);
+  padding: 1.1rem 0;
+}
+
+.franja-verde strong {
+  color: var(--blanco);
+}
+
+/* ---------- Cards de producto ---------- */
+.card-producto {
+  background-color: var(--negro-tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.card-producto:hover {
+  border-color: var(--rojo);
+  transform: translateY(-3px);
+}
+
+.card-producto img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+
+.card-producto .cuerpo {
+  padding: 1.1rem 1.1rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.card-producto .precio {
+  color: var(--amarillo);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.card-producto .categoria-tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--negro);
+  background-color: var(--amarillo);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+/* ---------- Combos ---------- */
+.card-combo {
+  background: linear-gradient(160deg, var(--negro-tarjeta) 0%, var(--negro-suave) 100%);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.4rem;
+  height: 100%;
+}
+
+.card-combo h3 {
+  font-size: 1.35rem;
+  color: var(--blanco);
+  margin-bottom: 0.4rem;
+}
+
+.card-combo .precio {
+  color: var(--amarillo);
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin: 0.6rem 0 1rem;
+}
+
+/* ---------- Filtros de categoria (menu.html) ---------- */
+.filtro-categoria {
+  background: transparent;
+  border: 1px solid var(--borde);
+  color: var(--blanco);
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filtro-categoria.activo {
+  background-color: var(--rojo);
+  border-color: var(--rojo);
+  color: var(--blanco);
+}
+
+/* ---------- Footer ---------- */
+.footer-fornace {
+  background-color: #0c0c0c;
+  border-top: 1px solid var(--borde);
+  padding: 3rem 0 1.5rem;
+  margin-top: 3rem;
+}
+
+.footer-fornace h5 {
+  font-family: var(--fuente-display);
+  font-size: 1.1rem;
+  color: var(--blanco);
+  margin-bottom: 1rem;
+}
+
+.footer-fornace a {
+  color: var(--gris-texto);
+  display: block;
+  padding: 0.2rem 0;
+}
+
+.footer-fornace a:hover {
+  color: var(--amarillo);
+}
+
+.footer-fornace .redes a {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--borde);
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.footer-fornace .copy {
+  border-top: 1px solid var(--borde);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--gris-texto);
+}
+
+/* ---------- Modal login ---------- */
+.modal-fornace .modal-content {
+  background-color: var(--negro-tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: var(--blanco);
+}
+
+.modal-fornace .form-control {
+  background-color: var(--negro);
+  border: 1px solid var(--borde);
+  color: var(--blanco);
+}
+
+.modal-fornace .form-control:focus {
+  background-color: var(--negro);
+  color: var(--blanco);
+  border-color: var(--rojo);
+  box-shadow: 0 0 0 0.2rem rgba(230, 74, 25, 0.25);
+}
+
+.modal-fornace .form-label {
+  color: var(--gris-texto);
+  font-size: 0.9rem;
+}
+
+/* ---------- Formularios (contacto) ---------- */
+.form-fornace .form-control,
+.form-fornace .form-select {
+  background-color: var(--negro-tarjeta);
+  border: 1px solid var(--borde);
+  color: var(--blanco);
+  padding: 0.7rem 0.9rem;
+}
+
+.form-fornace .form-control:focus,
+.form-fornace .form-select:focus {
+  background-color: var(--negro-tarjeta);
+  color: var(--blanco);
+  border-color: var(--rojo);
+  box-shadow: 0 0 0 0.2rem rgba(230, 74, 25, 0.25);
+}
+
+.form-fornace .form-label {
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+/* ---------- Carrito ---------- */
+.item-carrito {
+  background-color: var(--negro-tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.item-carrito img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.control-cantidad button {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--borde);
+  background: transparent;
+  color: var(--blanco);
+  font-weight: 700;
+}
+
+.resumen-total {
+  background-color: var(--negro-tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.4rem;
+}
+
+.resumen-total .linea {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  color: var(--gris-texto);
+}
+
+.resumen-total .linea.total {
+  color: var(--blanco);
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-top: 1px solid var(--borde);
+  padding-top: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+/* ---------- Sucursales ---------- */
+.mapa-embed {
+  border-radius: var(--radio);
+  overflow: hidden;
+  border: 1px solid var(--borde);
+  height: 360px;
+}
+
+.mapa-embed iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: grayscale(0.3) invert(0.92) contrast(0.9);
+}
+
+.card-sucursal {
+  background-color: var(--negro-tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.4rem;
+}
+
+/* ---------- Toast simulado ---------- */
+.toast-fornace {
+  background-color: var(--verde);
+  color: var(--blanco);
+  border: none;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 576px) {
+  .hero-carrusel .carousel-caption {
+    left: 5%;
+    right: 5%;
+    bottom: 10%;
+  }
+  .seccion {
+    padding: 2.2rem 0;
+  }
+}

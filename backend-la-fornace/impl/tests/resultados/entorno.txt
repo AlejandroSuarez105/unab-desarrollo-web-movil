@@ -1,0 +1,10 @@
+Fecha (UTC): 2026-11-08T22:07:16Z
+Sistema: Windows-11-10.0.26300-SP0
+Python: 3.14.10
+Node: v26.13.0
+Java: openjdk version "17.0.21" 2026-10-20
+Docker: 29.9.2
+Docker Compose: 5.6.1
+Vault: Vault v1.18.5 (2cb3755273dbd63f5b0f8ec50089b57ffd3fa330), built 2025-02-24T09:40:28Z
+ActiveMQ: apache-activemq-6.2.0
+MongoDB (modo local): 7.0.45

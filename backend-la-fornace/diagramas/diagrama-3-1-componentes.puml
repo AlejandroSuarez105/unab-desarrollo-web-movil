@@ -1,0 +1,106 @@
+@startuml diagrama-3-1-componentes
+title Diagrama 3.1 - Mapa de componentes de La Fornace
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam ranksep 70
+skinparam nodesep 35
+skinparam componentStyle rectangle
+skinparam rectangle {
+  BorderColor #555555
+}
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #444444
+}
+skinparam database {
+  BackgroundColor #FFF8E1
+  BorderColor #8D6E00
+}
+skinparam cloud {
+  BackgroundColor #F2F2F2
+  BorderColor #666666
+}
+skinparam ArrowColor #333333
+
+rectangle "ZONA PUBLICA (Internet)" #F4F6F7 {
+  actor "Cliente / Personal" as U
+  component "Frontend\n(navegador)" as FE
+}
+cloud "Plataforma de pago\n(externa, adaptador de prueba)" as PP
+cloud "Proveedor de correo\n(externo: validacion y envio)" as SMTP
+
+rectangle "BORDE (unico puerto publicado)" #FDEDEC {
+  component "API Gateway\n(FastAPI)" as GW
+}
+
+rectangle "RED PRIVADA DOCKER (sin puertos publicados)" #EAF2F8 {
+  component "auth-service\nCuentas, sesiones,\npersonal" as AUTH
+  component "clients-service\nPerfil de clientes" as CLI
+  component "inventory-service\nProductos, stock,\nreservas" as INV
+  component "orders-service\nPedidos y su estado" as ORD
+  component "payments-service\nPagos, ventas, boletas" as PAY
+  component "dispatch-service\nOrdenes de despacho" as DIS
+  component "notifications-service\nCorreo y contacto" as NOT
+  component "graphql-gateway\nAgregacion de lectura" as GQL
+  queue "ActiveMQ\n/queue/cola_pedidos" as MQ
+  component "Vault\nsecretos y credenciales" as V
+
+  database "auth_db" as DB1
+  database "clients_db" as DB2
+  database "inventory_db" as DB3
+  database "orders_db" as DB4
+  database "payments_db" as DB5
+  database "dispatch_db" as DB6
+  database "notifications_db" as DB7
+}
+
+U --> FE
+FE --> GW : HTTPS + Bearer
+PP --> GW : I15 webhook firmado
+GW --> AUTH : I01 introspeccion
+GW ..> CLI : I02 (reenvio)
+GW ..> INV
+GW ..> ORD
+GW ..> PAY
+GW ..> DIS
+GW ..> NOT
+GW ..> GQL
+GQL --> ORD : lectura
+GQL --> INV : lectura
+GQL --> CLI : lectura
+
+CLI --> AUTH : I03 crear cuenta\nI04 consultar estado\nI05 desactivar
+AUTH --> NOT : I06 validar correo\ny enviar enlace
+ORD --> CLI : I07 datos del cliente
+ORD --> INV : I08 reservar\nI09 confirmar\nI10 liberar
+ORD --> MQ : I14 publicar orden\n(nueva / anulada)
+MQ --> DIS : consumir
+PAY --> ORD : I11 pedido pagable\nI12 confirmar pago
+PAY --> NOT : I13 enviar boleta
+PAY --> PP : I16 crear cobro
+NOT --> SMTP : I17
+
+AUTH -- DB1
+CLI -- DB2
+INV -- DB3
+ORD -- DB4
+PAY -- DB5
+DIS -- DB6
+NOT -- DB7
+
+note bottom of V
+  Todos los sistemas leen sus credenciales de Vault al arrancar.
+  Una sola instancia de MongoDB con una base y un usuario por sistema.
+end note
+
+legend bottom right
+  <b>Leyenda</b>
+  flecha continua: llamada de un sistema a otro (quien llama depende del llamado)
+  flecha punteada: el gateway reenvia la solicitud con su identidad verificada
+  Ningun sistema lee la base de otro.
+  El detalle de cada intercambio I01 a I17 esta en la tabla 3.7.
+end legend
+@enduml

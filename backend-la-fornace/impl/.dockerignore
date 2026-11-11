@@ -1,0 +1,4 @@
+.run
+.git
+**/__pycache__
+**/*.pyc

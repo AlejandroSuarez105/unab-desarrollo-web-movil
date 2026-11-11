@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis pedidos — La Fornace</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-fornace">
+  <div class="container">
+    <a class="navbar-brand" href="index.html"><span class="llama">●</span> La Fornace</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="border-color:#2c2c2c;">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
+        <li class="nav-item"><a class="nav-link" href="sucursales.html">Sucursales</a></li>
+        <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
+      </ul>
+      <div class="d-flex gap-2 mt-3 mt-lg-0">
+        <button class="icono-boton" data-bs-toggle="modal" data-bs-target="#modalLogin">Iniciar sesión</button>
+        <a href="carrito.html" class="icono-boton">🛒 Carrito <span class="badge-carrito" data-badge-carrito>0</span></a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="seccion container" style="padding-bottom:1rem;">
+  <h1 class="seccion-titulo">Mis pedidos</h1>
+</header>
+<section class="container pb-5">
+  <div id="mp-error" class="alert alert-danger small d-none" role="alert"></div>
+  <div id="mp-lista" class="row g-3"></div>
+  <div id="mp-vacio" class="texto-muted d-none">Todavía no tienes pedidos. <a href="menu.html">Ir al menú</a></div>
+</section>
+<div class="modal fade modal-fornace" id="modalDetalle" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
+    <div class="modal-header border-0"><h5 class="modal-title titulo-display" id="md-titulo">Detalle</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body" id="md-cuerpo"></div>
+  </div></div>
+</div>
+
+<footer class="footer-fornace">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <h5>La Fornace</h5>
+        <p class="texto-muted small">Pizza artesanal a la piedra, horneada con leña, con despacho a domicilio en Maipú y alrededores.</p>
+        <div class="redes">
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="WhatsApp">WA</a>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <h5>Navegación</h5>
+        <a href="index.html">Inicio</a>
+        <a href="menu.html">Menú</a>
+        <a href="sucursales.html">Sucursales</a>
+        <a href="contacto.html">Contacto</a>
+      </div>
+      <div class="col-6 col-md-3">
+        <h5>Ayuda</h5>
+        <a href="carrito.html">Mi carrito</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalLogin">Iniciar sesión</a>
+        <a href="contacto.html">Trabaja con nosotros</a>
+      </div>
+      <div class="col-12 col-md-3">
+        <h5>Horario</h5>
+        <p class="texto-muted small mb-0">Lunes a Domingo<br>12:30 – 23:30 hrs</p>
+      </div>
+    </div>
+    <div class="copy text-center">
+      © 2026 Pizzeria La Fornace. Proyecto académico — Desarrollo Web y Móvil, UNAB.
+    </div>
+  </div>
+</footer>
+
+<div id="toast-contenedor" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:2000;"></div>
+
+<div class="modal fade modal-fornace" id="modalLogin" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title titulo-display">Iniciar sesión</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form class="needs-validation" novalidate onsubmit="iniciarSesion(event)">
+          <div id="login-error" data-error class="alert alert-danger py-2 small d-none" role="alert"></div>
+          <div class="mb-3">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" name="correo" class="form-control" required autocomplete="username" placeholder="tucorreo@ejemplo.com">
+            <div class="invalid-feedback">Ingresa un correo válido.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" name="password" class="form-control" required minlength="1" autocomplete="current-password" placeholder="••••••••">
+            <div class="invalid-feedback">Ingresa tu contraseña.</div>
+          </div>
+          <button type="submit" class="btn btn-fornace w-100">Entrar</button>
+          <p class="small texto-muted mt-3 mb-0">¿No tienes cuenta? <a href="registro.html">Regístrate</a> · <a href="confirmar-correo.html">Reenviar correo de confirmación</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+const ESTADOS = { pendiente_pago: "Pendiente de pago", pagado: "Pagado", en_preparacion: "En preparación", en_despacho: "En despacho", entregado: "Entregado", anulado: "Anulado" };
+const Q_DETALLE = `query DetallePedido($id: ID!) { resumenPedido(id: $id) { id estado estadoPago total creadoEn boletaDisponible
+  direccionEntrega { calle comuna referencia } historialEstados { estado fecha }
+  items { nombre cantidad precioUnitario producto { nombre descripcion imagen disponible } } } }`;
+
+async function cargar() {
+  if (!exigirSesion(["cliente"])) return;
+  const err = document.getElementById("mp-error"); err.classList.add("d-none");
+  try {
+    const lista = await api("GET", "/orders?limit=50");
+    document.getElementById("mp-vacio").classList.toggle("d-none", lista.length > 0);
+    document.getElementById("mp-lista").innerHTML = lista.map((p) => `
+      <div class="col-12 col-md-6"><div class="resumen-total">
+        <div class="d-flex justify-content-between"><strong>${esc(p.id)}</strong><span class="badge bg-secondary">${esc(ESTADOS[p.estado] || p.estado)}</span></div>
+        <div class="texto-muted small">${esc(p.creadoEn)}</div>
+        <div class="precio my-2">${formatCLP(p.total)}</div>
+        <button class="btn btn-fornace btn-sm" onclick="verDetalle('${esc(p.id)}')">Ver detalle</button>
+        ${p.estado === "pendiente_pago" || p.estado === "pagado" ? `<button class="btn btn-fornace-outline btn-sm" onclick="anular('${esc(p.id)}')">Anular</button>` : ""}
+      </div></div>`).join("");
+  } catch (e) { err.textContent = mensajeError(e); err.classList.remove("d-none"); }
+}
+
+// P11: una sola llamada GraphQL trae el detalle con los productos vigentes. Si GraphQL no responde se usa el servicio REST (S14).
+async function verDetalle(id) {
+  const cuerpo = document.getElementById("md-cuerpo");
+  document.getElementById("md-titulo").textContent = "Pedido " + id;
+  cuerpo.innerHTML = "Cargando…";
+  new bootstrap.Modal(document.getElementById("modalDetalle")).show();
+  let p = null;
+  try {
+    const r = await gql(Q_DETALLE, { id });
+    if (r.data && r.data.resumenPedido) p = r.data.resumenPedido;
+    else if (r.errors && r.errors[0].extensions.code === "NO_ENCONTRADO") { cuerpo.textContent = "Pedido no encontrado."; return; }
+  } catch (e) { p = null; }
+  if (!p) {
+    try { p = await api("GET", "/orders/" + encodeURIComponent(id)); }
+    catch (e) { cuerpo.textContent = mensajeError(e); return; }
+  }
+  const dir = p.direccionEntrega || {};
+  cuerpo.innerHTML = `
+    <p><span class="badge bg-secondary">${esc(ESTADOS[p.estado] || p.estado)}</span> · Pago: ${esc(p.estadoPago)} · Total <strong>${formatCLP(p.total)}</strong></p>
+    <p class="texto-muted">Entrega: ${esc(dir.calle)}, ${esc(dir.comuna)} ${esc(dir.referencia || "")}</p>
+    <div class="mb-3">${p.items.map((i) => `
+      <div class="d-flex align-items-center gap-3 mb-2">
+        ${i.producto && i.producto.imagen ? `<img src="${esc(i.producto.imagen)}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px">` : ""}
+        <div class="flex-grow-1"><div>${esc(i.nombre)} × ${i.cantidad}</div>
+          ${i.producto ? `<div class="small texto-muted">${esc(i.producto.descripcion)}</div>` : ""}</div>
+        <div>${formatCLP(i.precioUnitario * i.cantidad)}</div>
+      </div>`).join("")}</div>
+    <h6>Historial</h6>
+    <ul class="small texto-muted">${p.historialEstados.map((h) => `<li>${esc(ESTADOS[h.estado] || h.estado)} — ${esc(h.fecha)}</li>`).join("")}</ul>
+    ${p.boletaDisponible ? `<button class="btn btn-fornace btn-sm" onclick="verBoleta('${esc(p.id)}')">Ver boleta</button>` : ""}
+    <div id="md-boleta" class="mt-3"></div>`;
+}
+
+async function verBoleta(id) {
+  const box = document.getElementById("md-boleta");
+  try {
+    const b = await api("GET", `/orders/${encodeURIComponent(id)}/receipt`);
+    box.innerHTML = `<div class="resumen-total"><strong>Boleta ${esc(b.numeroBoleta)}</strong> · ${esc(b.fechaEmision)}<br>
+      ${b.items.map((i) => `${esc(i.nombre)} × ${i.cantidad} — ${formatCLP(i.precioUnitario * i.cantidad)}`).join("<br>")}<br>
+      Total ${formatCLP(b.total)} (IVA incluido ${formatCLP(b.ivaIncluido)})</div>`;
+  } catch (e) { box.textContent = mensajeError(e); }
+}
+
+async function anular(id) {
+  const motivo = prompt("Motivo de la anulación (5 a 200 caracteres):");
+  if (!motivo) return;
+  try {
+    const r = await api("POST", `/orders/${encodeURIComponent(id)}/cancel`, { motivo });
+    mostrarToast(r.reembolsoPendiente ? "Pedido anulado. El reembolso se gestiona manualmente." : "Pedido anulado");
+    cargar();
+  } catch (e) { mostrarToast(mensajeError(e)); }
+}
+document.addEventListener("DOMContentLoaded", cargar);
+function alIniciarSesion() { cargar(); }
+</script>
+</body>
+</html>

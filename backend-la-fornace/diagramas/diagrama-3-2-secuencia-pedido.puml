@@ -1,0 +1,62 @@
+@startuml diagrama-3-2-secuencia-pedido
+title Diagrama 3.2 - Crear pedido con reserva de stock (S12)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam sequenceMessageAlign left
+skinparam ParticipantPadding 20
+autonumber
+
+actor Cliente
+participant "Frontend" as FE
+participant "API Gateway" as GW
+participant "auth-service" as AUTH
+participant "orders-service" as ORD
+participant "clients-service" as CLI
+participant "inventory-service" as INV
+
+Cliente -> FE : "Confirmar pedido"
+FE -> GW : POST /api/v1/orders\nAuthorization: Bearer ...\nIdempotency-Key: k1\n{items[productoId, cantidad], direccionEntrega?}
+GW -> AUTH : I01 POST /introspect {token}\nX-Service-Id + X-Service-Secret
+AUTH --> GW : {active, cuentaId, correo, roles}
+note right of GW
+  Quita cualquier X-Authenticated-* que
+  venga del navegador y agrega los verificados:
+  X-Gateway-Secret, X-Authenticated-User,
+  X-Authenticated-Email, X-Authenticated-Roles,
+  X-Request-Id
+end note
+GW -> ORD : POST /orders (cabeceras verificadas)
+
+ORD -> ORD : valida X-Gateway-Secret y rol cliente\nbusca Idempotency-Key k1 + cuentaId
+alt la clave ya existe
+  ORD --> GW : 200 con el pedido ya creado (no crea otro)
+else clave nueva
+  ORD -> CLI : I07 GET /internal/clients/by-account/{cuentaId}
+  CLI --> ORD : {clienteId, nombreCompleto, telefono, direccion}
+  ORD -> ORD : valida comuna dentro de 3 km\ngenera pedidoId y expiraEn = ahora + 15 min
+  ORD -> INV : I08 POST /internal/stock/reservations\n{pedidoId, expiraEn + 5 min, items[productoId, cantidad]}
+  alt hay stock de todos los productos
+    INV -> INV : por cada item: stock >= cantidad\n(descuenta y registra MovimientoStock "reserva")
+    INV --> ORD : 201 {items[productoId, nombre, precioUnitario, cantidad]}
+    ORD -> ORD : calcula total con los precios recibidos\nguarda Pedido (pendiente_pago) + historial
+    ORD --> GW : 201 pedido (estado pendiente_pago)
+  else falta stock de algun producto
+    INV -> INV : revierte lo descontado (todo o nada)
+    INV --> ORD : 409 SIN_STOCK {productos[productoId, disponible]}
+    ORD --> GW : 409 (no se crea el pedido)
+  else inventory no responde en 3 s
+    ORD -> INV : reintento con el mismo pedidoId\n(idempotente: no descuenta dos veces)
+    ORD -> INV : si sigue sin respuesta: I10 liberar pedidoId (mejor esfuerzo)
+    ORD --> GW : 503 INVENTARIO_NO_DISPONIBLE (no se crea el pedido)
+    note right of INV
+      Si la reserva si se hizo, vence sola a los 20 min
+      (inventory libera las reservas sin confirmar).
+    end note
+  end
+end
+GW --> FE : respuesta de orders (el gateway no cambia el cuerpo)
+FE --> Cliente : modal "Pedido confirmado" o mensaje de error
+@enduml

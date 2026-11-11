@@ -1,0 +1,10 @@
+# Cola de despacho: ActiveMQ Classic (broker STOMP), con usuario sin privilegios.
+# La configuracion (usuarios y permisos) se genera al arrancar y llega en /run/pki/activemq.xml.
+ARG ACTIVEMQ_IMAGE=apache/activemq-classic:6.2.0
+FROM ${ACTIVEMQ_IMAGE}
+RUN echo 'app:x:10001:10001::/nonexistent:/usr/sbin/nologin' >> /etc/passwd && echo 'app:x:10001:' >> /etc/group \
+ && chown -R 10001:10001 /opt/apache-activemq/data /opt/apache-activemq/conf
+USER 10001
+EXPOSE 61613
+ENTRYPOINT ["/opt/apache-activemq/bin/activemq"]
+CMD ["console", "xbean:file:/run/pki/activemq.xml"]

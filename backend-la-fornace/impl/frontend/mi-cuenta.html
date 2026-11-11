@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi cuenta — La Fornace</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-fornace">
+  <div class="container">
+    <a class="navbar-brand" href="index.html"><span class="llama">●</span> La Fornace</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="border-color:#2c2c2c;">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
+        <li class="nav-item"><a class="nav-link" href="sucursales.html">Sucursales</a></li>
+        <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
+      </ul>
+      <div class="d-flex gap-2 mt-3 mt-lg-0">
+        <button class="icono-boton" data-bs-toggle="modal" data-bs-target="#modalLogin">Iniciar sesión</button>
+        <a href="carrito.html" class="icono-boton">🛒 Carrito <span class="badge-carrito" data-badge-carrito>0</span></a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="seccion container" style="padding-bottom:1rem;">
+  <h1 class="seccion-titulo">Mi cuenta</h1>
+</header>
+<section class="container pb-5">
+  <div id="mc-error" class="alert alert-danger small d-none" role="alert"></div>
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <form id="form-perfil" class="form-fornace needs-validation" novalidate onsubmit="guardar(event)">
+        <div class="row g-3">
+          <div class="col-12 col-md-6"><label class="form-label">RUN</label><input id="mc-run" class="form-control" disabled></div>
+          <div class="col-12 col-md-6"><label class="form-label">Correo</label><input id="mc-correo" class="form-control" disabled></div>
+          <div class="col-12"><label class="form-label">Nombre completo</label><input name="nombreCompleto" class="form-control" required minlength="2" maxlength="100"></div>
+          <div class="col-12 col-md-4"><label class="form-label">Teléfono</label><input name="telefono" class="form-control" required pattern="[0-9+ ]{8,15}"></div>
+          <div class="col-12 col-md-4"><label class="form-label">Nacimiento</label><input type="date" name="fechaNacimiento" class="form-control" required></div>
+          <div class="col-12 col-md-4"><label class="form-label">Sexo</label><select name="sexo" class="form-select" required><option value="F">Femenino</option><option value="M">Masculino</option><option value="O">Otro</option></select></div>
+          <div class="col-12"><label class="form-label">Calle y número</label><input name="calle" class="form-control" required></div>
+          <div class="col-12 col-md-4"><label class="form-label">Comuna</label><input name="comuna" class="form-control" required></div>
+          <div class="col-12 col-md-4"><label class="form-label">Provincia</label><input name="provincia" class="form-control" required></div>
+          <div class="col-12 col-md-4"><label class="form-label">Región</label><input name="region" class="form-control" required></div>
+          <div class="col-12"><button class="btn btn-fornace" type="submit">Guardar</button></div>
+        </div>
+      </form>
+    </div>
+    <div class="col-12 col-lg-5">
+      <h2 class="h5">Mis últimos pedidos</h2>
+      <div id="mc-pedidos" class="texto-muted small">Cargando…</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer-fornace">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <h5>La Fornace</h5>
+        <p class="texto-muted small">Pizza artesanal a la piedra, horneada con leña, con despacho a domicilio en Maipú y alrededores.</p>
+        <div class="redes">
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="WhatsApp">WA</a>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <h5>Navegación</h5>
+        <a href="index.html">Inicio</a>
+        <a href="menu.html">Menú</a>
+        <a href="sucursales.html">Sucursales</a>
+        <a href="contacto.html">Contacto</a>
+      </div>
+      <div class="col-6 col-md-3">
+        <h5>Ayuda</h5>
+        <a href="carrito.html">Mi carrito</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalLogin">Iniciar sesión</a>
+        <a href="contacto.html">Trabaja con nosotros</a>
+      </div>
+      <div class="col-12 col-md-3">
+        <h5>Horario</h5>
+        <p class="texto-muted small mb-0">Lunes a Domingo<br>12:30 – 23:30 hrs</p>
+      </div>
+    </div>
+    <div class="copy text-center">
+      © 2026 Pizzeria La Fornace. Proyecto académico — Desarrollo Web y Móvil, UNAB.
+    </div>
+  </div>
+</footer>
+
+<div id="toast-contenedor" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:2000;"></div>
+
+<div class="modal fade modal-fornace" id="modalLogin" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title titulo-display">Iniciar sesión</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form class="needs-validation" novalidate onsubmit="iniciarSesion(event)">
+          <div id="login-error" data-error class="alert alert-danger py-2 small d-none" role="alert"></div>
+          <div class="mb-3">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" name="correo" class="form-control" required autocomplete="username" placeholder="tucorreo@ejemplo.com">
+            <div class="invalid-feedback">Ingresa un correo válido.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" name="password" class="form-control" required minlength="1" autocomplete="current-password" placeholder="••••••••">
+            <div class="invalid-feedback">Ingresa tu contraseña.</div>
+          </div>
+          <button type="submit" class="btn btn-fornace w-100">Entrar</button>
+          <p class="small texto-muted mt-3 mb-0">¿No tienes cuenta? <a href="registro.html">Regístrate</a> · <a href="confirmar-correo.html">Reenviar correo de confirmación</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+// P12: una sola consulta GraphQL (miCuenta) trae el perfil y los ultimos pedidos. Cada parte puede fallar por separado.
+const Q_CUENTA = `query MiCuenta { miCuenta(limitePedidos: 5) { perfil { nombreCompleto correo telefono direccion { calle comuna provincia region } } pedidos { id estado total creadoEn } } }`;
+let PERFIL_COMPLETO = null;
+async function cargar() {
+  if (!exigirSesion(["cliente"])) return;
+  const err = document.getElementById("mc-error");
+  try {
+    const r = await gql(Q_CUENTA);
+    const mc = r.data && r.data.miCuenta;
+    if (mc && mc.perfil) rellenar(mc.perfil);
+    else {   // respaldo REST (S24)
+      const p = await api("GET", "/clients/me");
+      PERFIL_COMPLETO = p; rellenar(p);
+    }
+    const box = document.getElementById("mc-pedidos");
+    if (mc && mc.pedidos) box.innerHTML = mc.pedidos.length ? mc.pedidos.map((p) => `<div class="mb-2">${esc(p.id)} · ${esc(p.estado)} · ${formatCLP(p.total)}</div>`).join("") : "Aún no tienes pedidos.";
+    else box.textContent = "No pudimos cargar tus pedidos ahora.";
+  } catch (e) { err.textContent = mensajeError(e); err.classList.remove("d-none"); }
+}
+async function rellenar(p) {
+  const f = document.getElementById("form-perfil");
+  document.getElementById("mc-correo").value = p.correo || "";
+  // el RUN, la fecha de nacimiento y el sexo no estan en GraphQL (minimo necesario): se leen del servicio de perfil (S24)
+  const full = PERFIL_COMPLETO || (PERFIL_COMPLETO = await api("GET", "/clients/me"));
+  document.getElementById("mc-run").value = full.run;
+  f.nombreCompleto.value = full.nombreCompleto; f.telefono.value = full.telefono; f.fechaNacimiento.value = full.fechaNacimiento; f.sexo.value = full.sexo;
+  f.calle.value = full.direccion.calle; f.comuna.value = full.direccion.comuna; f.provincia.value = full.direccion.provincia; f.region.value = full.direccion.region;
+}
+async function guardar(event) {
+  event.preventDefault();
+  const f = event.target;
+  if (!f.checkValidity()) { f.classList.add("was-validated"); return; }
+  try {
+    PERFIL_COMPLETO = await api("PUT", "/clients/me", {
+      nombreCompleto: f.nombreCompleto.value.trim(), telefono: f.telefono.value.trim(), fechaNacimiento: f.fechaNacimiento.value, sexo: f.sexo.value,
+      direccion: { calle: f.calle.value.trim(), comuna: f.comuna.value.trim(), provincia: f.provincia.value.trim(), region: f.region.value.trim() },
+    });
+    mostrarToast("Datos guardados");
+  } catch (e) { mostrarToast(mensajeError(e)); }
+}
+document.addEventListener("DOMContentLoaded", cargar);
+</script>
+</body>
+</html>

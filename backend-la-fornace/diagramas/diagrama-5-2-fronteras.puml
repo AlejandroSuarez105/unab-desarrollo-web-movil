@@ -1,0 +1,76 @@
+@startuml diagrama-5-2-fronteras
+title Diagrama 5.2 - Fronteras de confianza y flujos de red
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam ranksep 60
+skinparam nodesep 35
+skinparam componentStyle rectangle
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #444444
+}
+skinparam database {
+  BackgroundColor #FFF8E1
+  BorderColor #8D6E00
+}
+skinparam cloud {
+  BackgroundColor #F2F2F2
+  BorderColor #666666
+}
+skinparam ArrowColor #333333
+
+rectangle "Z0 INTERNET (no confiable)" #F4F6F7 {
+  component "Navegador\n(frontend)" as NAV
+}
+cloud "Z4 EXTERNOS (no confiables)\nPlataforma de pago\nProveedor de correo" as EXT
+
+rectangle "Z1 BORDE" #FDEDEC {
+  component "API Gateway\nunico puerto publicado" as GW
+}
+
+rectangle "Z2 RED PRIVADA (sin puertos publicados)" #EAF2F8 {
+  component "Auth Service" as AUTH
+  component "GraphQL Gateway" as GQL
+  component "inventory\norders\nclients" as SYS1
+  component "payments\ndispatch\nnotifications" as SYS2
+}
+
+rectangle "Z3 DATOS Y SECRETOS (solo el dueno)" #FEF9E7 {
+  component "Vault" as V
+  database "MongoDB\nuna base y un usuario\npor sistema" as DB
+  queue "ActiveMQ" as MQ
+}
+
+NAV --> GW : F1 HTTPS\ntoken Bearer del usuario
+EXT --> GW : F2 aviso de pago\nfirma HMAC
+GW --> AUTH : F3 introspeccion\ngateway-introspect
+GW --> SYS1 : F4 reenvio + contexto verificado\ngateway-to-<sistema>
+GW --> SYS2 : F4
+GW --> GQL : F5 POST /graphql\ngateway-to-graphql
+GQL --> SYS1 : F6 solo lectura\ngraphql-to-<sistema>\n+ contexto del usuario
+SYS1 --> SYS2 : F7 par X-Service-Id\n(un secreto por camino)
+SYS2 --> SYS1 : F7
+SYS1 --> AUTH : F7
+SYS2 --> EXT : F8 salida con clave\ndel proveedor
+GW ..> V : F9 lee secretos\n(token de solo lectura)
+AUTH ..> V : F9
+GQL ..> V : F9
+SYS1 ..> V : F9
+SYS2 ..> V : F9
+SYS1 --> DB : F10 usuario propio
+SYS2 --> DB : F10
+AUTH --> DB : F10
+SYS1 --> MQ : F11 orders escribe
+MQ --> SYS2 : F11 dispatch lee
+
+legend bottom right
+  <b>Leyenda</b>
+  cada flecha F1 a F11 es un flujo de red con su credencial
+  flecha punteada: lectura de secretos al arrancar o con cache corto
+  Las fronteras son Z0|Z1, Z1|Z2, Z2|Z3 y Z2|Z4.
+  Un sistema de Z2 solo acepta llamadas con la credencial que le corresponde.
+end legend
+@enduml

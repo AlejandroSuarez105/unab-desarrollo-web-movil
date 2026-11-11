@@ -1,0 +1,171 @@
+{
+ "suite": "e2e_frontend",
+ "ejecutado": "2026-11-08T21:58:57Z",
+ "segundos": 20.6,
+ "total": 27,
+ "ok": 27,
+ "casos": [
+  {
+   "id": "E2E-01",
+   "descripcion": "Inicio muestra combos y destacados desde S06",
+   "estado": "OK",
+   "observado": "4 combos, 3 destacados"
+  },
+  {
+   "id": "E2E-02",
+   "descripcion": "Menu filtra por categoria con datos del servidor",
+   "estado": "OK",
+   "observado": "todas=8, premium=3"
+  },
+  {
+   "id": "E2E-03",
+   "descripcion": "Registro de cliente (S03) deja la cuenta pendiente y envia correo",
+   "estado": "OK",
+   "observado": "mensaje de confirmacion visible"
+  },
+  {
+   "id": "E2E-04",
+   "descripcion": "Login con correo sin confirmar se rechaza (403)",
+   "estado": "OK",
+   "observado": "Confirma tu correo para activar la cuenta. (código de soporte: req_3633c0680ae5)"
+  },
+  {
+   "id": "E2E-05",
+   "descripcion": "Confirmar correo con el enlace de un solo uso (S04)",
+   "estado": "OK",
+   "observado": "cuenta activa"
+  },
+  {
+   "id": "E2E-06",
+   "descripcion": "El enlace de confirmacion no se puede reutilizar (410)",
+   "estado": "OK",
+   "observado": "410 TOKEN_VENCIDO"
+  },
+  {
+   "id": "E2E-07",
+   "descripcion": "Login (S01): el token queda solo en sessionStorage, no en localStorage",
+   "estado": "OK",
+   "observado": "token en sessionStorage; localStorage solo tiene el carrito"
+  },
+  {
+   "id": "E2E-08",
+   "descripcion": "Carrito precarga la direccion del perfil (S24) y no cobra despacho",
+   "estado": "OK",
+   "observado": "calle=Calle Ficticia 100, total=$10.980"
+  },
+  {
+   "id": "E2E-09",
+   "descripcion": "Confirmar pedido (S12) + iniciar pago (S20) redirige a la plataforma de pago",
+   "estado": "OK",
+   "observado": "https://127.0.0.1:9201"
+  },
+  {
+   "id": "E2E-10",
+   "descripcion": "Retorno de pago: el estado \"pagado\" viene del servidor (S14) tras el aviso firmado",
+   "estado": "OK",
+   "observado": "Pago confirmado. Tu pedido está en cola de preparación."
+  },
+  {
+   "id": "T-GQL-15",
+   "descripcion": "P11 usa una sola llamada POST /api/v1/graphql y ninguna a /orders/{id} ni /products",
+   "estado": "OK",
+   "observado": "graphql=1, otras=0"
+  },
+  {
+   "id": "E2E-12",
+   "descripcion": "Boleta digital del pedido pagado (S23)",
+   "estado": "OK",
+   "observado": "Boleta B-000009 · 2026-11-08T21:58:44Z Napolitana × 1 — $8.990 Bebida 500ml × 1 — $1.990 Total $10.980 (IVA incluido $1."
+  },
+  {
+   "id": "E2E-13",
+   "descripcion": "Mi cuenta (miCuenta GraphQL + S24) muestra perfil y ultimos pedidos",
+   "estado": "OK",
+   "observado": "ped_0018 · pagado · $10.980"
+  },
+  {
+   "id": "E2E-14",
+   "descripcion": "Formulario de contacto guarda el mensaje (S35)",
+   "estado": "OK",
+   "observado": "confirmacion visible"
+  },
+  {
+   "id": "E2E-15",
+   "descripcion": "Anular un pedido pendiente propio (S15)",
+   "estado": "OK",
+   "observado": "estado Anulado visible"
+  },
+  {
+   "id": "E2E-16",
+   "descripcion": "Panel del encargado de despachos muestra solo sus secciones",
+   "estado": "OK",
+   "observado": "['Pedidos y ventas', 'Despacho']"
+  },
+  {
+   "id": "E2E-17",
+   "descripcion": "Cola de despacho (S18) muestra ordenes pagadas",
+   "estado": "OK",
+   "observado": "5 ordenes en cola"
+  },
+  {
+   "id": "E2E-18",
+   "descripcion": "Imprimir orden (S19) abre el documento HTML con numero de orden",
+   "estado": "OK",
+   "observado": "Orden OD-000005  Pedido ped_0009 - pagado 2026-11-08T21:58:11Z  Cliente: Cliente na 800931 - Tel. +5"
+  },
+  {
+   "id": "E2E-19",
+   "descripcion": "Panel del dueno: productos y reporte",
+   "estado": "OK",
+   "observado": "['Productos', 'Reporte de ventas']"
+  },
+  {
+   "id": "E2E-20",
+   "descripcion": "Reporte de ventas (S34) con total y productos mas vendidos",
+   "estado": "OK",
+   "observado": "Total recaudado: $104.360 · Ventas: 9  El total no descuenta reembolsos pendientes.  Por día Fecha\tVentas\tTotal 2026-11-"
+  },
+  {
+   "id": "E2E-21",
+   "descripcion": "Panel del administrador muestra las seis secciones",
+   "estado": "OK",
+   "observado": "['Productos', 'Pedidos y ventas', 'Despacho', 'Clientes', 'Usuarios', 'Reporte de ventas']"
+  },
+  {
+   "id": "E2E-22",
+   "descripcion": "Usuarios del personal (S31) sin contrasenas ni hashes",
+   "estado": "OK",
+   "observado": "6 usuarios"
+  },
+  {
+   "id": "E2E-M1",
+   "descripcion": "Telefono 390 px: index.html sin desplazamiento horizontal y con menu plegable",
+   "estado": "OK",
+   "observado": "scrollWidth=398, innerWidth=398, menu plegable=True"
+  },
+  {
+   "id": "E2E-M2",
+   "descripcion": "Telefono 390 px: menu.html sin desplazamiento horizontal y con menu plegable",
+   "estado": "OK",
+   "observado": "scrollWidth=390, innerWidth=390, menu plegable=True"
+  },
+  {
+   "id": "E2E-M3",
+   "descripcion": "Telefono 390 px: registro.html sin desplazamiento horizontal y con menu plegable",
+   "estado": "OK",
+   "observado": "scrollWidth=390, innerWidth=390, menu plegable=True"
+  },
+  {
+   "id": "E2E-M4",
+   "descripcion": "Telefono 390 px: contacto.html sin desplazamiento horizontal y con menu plegable",
+   "estado": "OK",
+   "observado": "scrollWidth=390, innerWidth=390, menu plegable=True"
+  },
+  {
+   "id": "E2E-M5",
+   "descripcion": "Telefono 390 px: sucursales.html sin desplazamiento horizontal y con menu plegable",
+   "estado": "OK",
+   "observado": "scrollWidth=390, innerWidth=390, menu plegable=True"
+  }
+ ]
+}

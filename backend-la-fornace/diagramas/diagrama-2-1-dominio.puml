@@ -1,0 +1,347 @@
+@startuml diagrama-2-1-dominio
+title Diagrama 2.1 - Modelo de dominio de La Fornace (entidades y cardinalidades)
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 130
+skinparam ranksep 55
+skinparam nodesep 40
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #444444
+  ArrowColor #333333
+}
+skinparam enum {
+  BackgroundColor #FFF8E1
+  BorderColor #8D6E00
+}
+hide empty methods
+hide circle
+
+' ---------------------------------------------------------------
+' Acceso y cuentas (sistema de autenticacion)
+' ---------------------------------------------------------------
+package "Sistema auth (acceso y cuentas)" #EEF2FF {
+  class Cuenta {
+    +id : String
+    +correo : String
+    -passwordHash : String
+    +rol : Rol
+    +estado : EstadoCuenta
+    -intentosFallidos : Integer
+    +creadoEn : DateTime
+  }
+  class Sesion {
+    +id : String
+    -tokenHash : String
+    +creadaEn : DateTime
+    +expiraEn : DateTime
+    +revocadaEn : DateTime [0..1]
+  }
+  class TokenVerificacion {
+    +id : String
+    -tokenHash : String
+    +expiraEn : DateTime
+    +usadoEn : DateTime [0..1]
+  }
+  class Usuario {
+    +id : String
+    -cuentaId : String
+    +nombreCompleto : String
+  }
+}
+
+' ---------------------------------------------------------------
+' Clientes
+' ---------------------------------------------------------------
+package "Sistema clients" #E9F7EF {
+  class Cliente {
+    +id : String
+    -cuentaId : String
+    +run : String
+    +nombreCompleto : String
+    +telefono : String
+    +fechaNacimiento : Date
+    +sexo : Sexo
+    +creadoEn : DateTime
+  }
+  class Direccion {
+    +calle : String
+    +comuna : String
+    +provincia : String
+    +region : String
+  }
+}
+
+' ---------------------------------------------------------------
+' Inventario
+' ---------------------------------------------------------------
+package "Sistema inventory" #FFF4E5 {
+  class Producto {
+    +id : String
+    +nombre : String
+    +categoria : Categoria
+    +descripcion : String
+    +precio : Integer
+    +imagen : String
+    +destacado : Boolean
+    +stock : Integer
+    +disponible : Boolean
+    +retirado : Boolean
+    -actualizadoEn : DateTime
+  }
+  class MovimientoStock {
+    +id : String
+    +productoId : String
+    -pedidoId : String [0..1]
+    -tipo : TipoMovimiento
+    -cantidad : Integer
+    -creadoEn : DateTime
+    -expiraEn : DateTime [0..1]
+  }
+}
+
+' ---------------------------------------------------------------
+' Pedidos y despacho
+' ---------------------------------------------------------------
+package "Sistema orders" #FDEDEC {
+  class Pedido {
+    +id : String
+    -clienteId : String
+    -cuentaId : String
+    +clienteNombre : String
+    -clienteTelefono : String
+    -clienteCorreo : String
+    +estado : EstadoPedido
+    +total : Integer
+    +creadoEn : DateTime
+    +expiraEn : DateTime
+    -pagadoEn : DateTime [0..1]
+    +motivoAnulacion : String [0..1]
+    +reembolsoPendiente : Boolean
+    -claveIdempotencia : String [0..1]
+    -reservaConfirmada : Boolean
+    -despachoPublicado : Boolean
+  }
+  class DetallePedido {
+    +linea : Integer
+    +productoId : String
+    +nombreProducto : String
+    +cantidad : Integer
+    +precioUnitario : Integer
+  }
+  class DireccionEntrega {
+    +calle : String
+    +comuna : String
+    +referencia : String [0..1]
+  }
+  class CambioEstado {
+    +estado : EstadoPedido
+    +fecha : DateTime
+    +motivo : String [0..1]
+    -actorId : String [0..1]
+  }
+}
+
+' ---------------------------------------------------------------
+' Despacho (sistema de despacho)
+' ---------------------------------------------------------------
+package "Sistema dispatch (despacho)" #FEF5E7 {
+  class OrdenDespacho {
+    +id : String
+    +numeroOrden : String
+    +pedidoId : String
+    +pagadoEn : DateTime
+    +clienteNombre : String
+    +telefono : String
+    +direccionEntrega : String
+    +impresa : Boolean
+    -anulada : Boolean
+    -recibidaEn : DateTime
+  }
+  class LineaDespacho {
+    +nombreProducto : String
+    +cantidad : Integer
+  }
+}
+
+' ---------------------------------------------------------------
+' Pagos y ventas
+' ---------------------------------------------------------------
+package "Sistema payments (pagos, ventas y boletas)" #F4ECF7 {
+  class Pago {
+    +id : String
+    +pedidoId : String
+    +medio : MedioPago
+    +estado : EstadoPago
+    +monto : Integer
+    +urlPago : String
+    +creadoEn : DateTime
+    +expiraEn : DateTime
+    -confirmadoEnPedidos : Boolean
+    -intentosConfirmacion : Integer
+    -motivoObservacion : String [0..1]
+  }
+  class EventoPago {
+    +eventoId : String
+    +estadoInformado : EstadoPago
+    +recibidoEn : DateTime
+    -firmaValida : Boolean
+  }
+  class Venta {
+    +id : String
+    +pedidoId : String
+    -cuentaId : String
+    +clienteNombre : String
+    -clienteCorreo : String
+    +total : Integer
+    +fecha : DateTime
+  }
+  class LineaVenta {
+    +productoId : String
+    +nombreProducto : String
+    +cantidad : Integer
+    +precioUnitario : Integer
+  }
+  class Boleta {
+    +numero : String
+    +fechaEmision : DateTime
+    +total : Integer
+    +ivaIncluido : Integer
+    +correoEnviado : Boolean
+    -intentosEnvio : Integer
+  }
+  class CajaVirtual {
+    +id : String
+    +nombre : String
+    +activa : Boolean
+  }
+}
+
+' ---------------------------------------------------------------
+' Contacto
+' ---------------------------------------------------------------
+package "Sistema notifications (mensajeria)" #F2F4F4 {
+  class MensajeContacto {
+    +id : String
+    +nombre : String
+    +correo : String
+    +telefono : String
+    +motivo : MotivoContacto
+    +mensaje : String
+    +recibidoEn : DateTime
+  }
+}
+
+' ---------------------------------------------------------------
+' Enumeraciones (tipos de atributo; no se dibujan lineas hacia ellas)
+' ---------------------------------------------------------------
+package "Enumeraciones" #FFFDF0 {
+  enum Rol {
+    cliente
+    administrador
+    dueno
+    cajero_virtual
+    encargado_despachos
+  }
+  enum EstadoCuenta {
+    pendiente_verificacion
+    activo
+    inactivo
+  }
+  enum Sexo {
+    F
+    M
+    O
+  }
+  enum Categoria {
+    clasica
+    premium
+    acompanamiento
+    bebida
+    combo
+  }
+  enum EstadoPedido {
+    pendiente_pago
+    pagado
+    en_preparacion
+    en_despacho
+    entregado
+    anulado
+  }
+  enum EstadoPago {
+    pendiente
+    aprobado
+    rechazado
+    expirado
+    observado
+  }
+  enum TipoMovimiento {
+    reserva
+    confirmacion
+    liberacion
+    ajuste
+  }
+  enum MedioPago {
+    servipag
+    deposito
+  }
+  enum MotivoContacto {
+    consulta_pedido
+    reserva_evento
+    alianza_comercial
+    otro
+  }
+}
+
+' ---------------------------------------------------------------
+' Relaciones (multiplicidad en ambos extremos)
+' ---------------------------------------------------------------
+' R01 y R02: perfiles de una cuenta
+Cuenta "1" -- "0..1" Cliente : R01 perfil de cliente >
+Cuenta "1" -- "0..1" Usuario : R02 perfil de personal >
+' R03 y R04: composiciones de la cuenta
+Cuenta "1" *-- "0..*" Sesion : R03 abre >
+Cuenta "1" *-- "0..*" TokenVerificacion : R04 recibe >
+' R05: domicilio del cliente
+Cliente "1" *-- "1" Direccion : R05 domicilio >
+' R06: pedidos del cliente
+Cliente "1" -- "0..*" Pedido : R06 realiza >
+' R07 a R10: composicion del pedido
+Pedido "1" *-- "1" DireccionEntrega : R07 se entrega en >
+Pedido "1" *-- "1..*" DetallePedido : R08 contiene >
+DetallePedido "0..*" -- "1" Producto : R09 corresponde a >
+Pedido "1" *-- "1..*" CambioEstado : R10 historial >
+' R11 y R12: pagos
+Pedido "1" -- "0..*" Pago : R11 se paga con >
+Pago "1" *-- "0..*" EventoPago : R12 recibe avisos >
+' R13 y R14: venta y boleta
+Pedido "1" -- "0..1" Venta : R13 genera >
+Venta "1" *-- "1" Boleta : R14 emite >
+' R15 y R16: caja virtual
+Venta "0..*" -left- "1" CajaVirtual : R15 se registra en >
+Usuario "1" -down- "0..1" CajaVirtual : R16 es responsable de >
+' R17: orden de despacho
+Pedido "1" -- "0..1" OrdenDespacho : R17 origina >
+' R18: movimientos de stock
+Producto "1" -- "0..*" MovimientoStock : R18 registra >
+' R19: lineas de la orden de despacho
+OrdenDespacho "1" *-- "1..*" LineaDespacho : R19 detalla >
+' R20: lineas de la venta
+Venta "1" *-- "1..*" LineaVenta : R20 detalla >
+
+legend bottom right
+  <b>Leyenda</b>
+  + atributo que puede salir en un DTO (cual DTO lo lleva: tabla 2.10)
+  - atributo interno: no sale en ningun DTO
+  [0..1] atributo opcional
+  rombo lleno: composicion (la parte no existe sin el todo)
+  linea simple: asociacion con multiplicidad
+  Cada recuadro es un sistema (Modulo 3) con su propia base de datos.
+  Las referencias entre sistemas (cuentaId, clienteId, productoId, pedidoId)
+  se hacen por identificador, no por acceso a la base de otro sistema.
+end legend
+@enduml

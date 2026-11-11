@@ -1,0 +1,630 @@
+[
+ {
+  "id": "R01",
+  "servicio": "S01",
+  "verbo": "POST",
+  "externa": "/api/v1/auth/login",
+  "sistema": "auth",
+  "interna": "/auth/login",
+  "acceso": "anonima",
+  "politica": null,
+  "roles": [],
+  "rl": "RL-SENSIBLE",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R02",
+  "servicio": "S02",
+  "verbo": "POST",
+  "externa": "/api/v1/auth/logout",
+  "sistema": "auth",
+  "interna": "/auth/logout",
+  "acceso": "autenticada",
+  "politica": "ROLES-TODOS",
+  "roles": [
+   "administrador",
+   "cajero_virtual",
+   "cliente",
+   "dueno",
+   "encargado_despachos"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R03",
+  "servicio": "S03",
+  "verbo": "POST",
+  "externa": "/api/v1/auth/register",
+  "sistema": "clients",
+  "interna": "/clients/register",
+  "acceso": "anonima",
+  "politica": null,
+  "roles": [],
+  "rl": "RL-SENSIBLE",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R04",
+  "servicio": "S04",
+  "verbo": "POST",
+  "externa": "/api/v1/auth/verify-email",
+  "sistema": "auth",
+  "interna": "/auth/verify-email",
+  "acceso": "anonima",
+  "politica": null,
+  "roles": [],
+  "rl": "RL-SENSIBLE",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R05",
+  "servicio": "S05",
+  "verbo": "POST",
+  "externa": "/api/v1/auth/resend-verification",
+  "sistema": "auth",
+  "interna": "/auth/resend-verification",
+  "acceso": "anonima",
+  "politica": null,
+  "roles": [],
+  "rl": "RL-SENSIBLE",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R06",
+  "servicio": "S06",
+  "verbo": "GET",
+  "externa": "/api/v1/products",
+  "sistema": "inventory",
+  "interna": "/products",
+  "acceso": "anonima",
+  "politica": null,
+  "roles": [],
+  "rl": "RL-CATALOGO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R07",
+  "servicio": "S07",
+  "verbo": "GET",
+  "externa": "/api/v1/admin/products",
+  "sistema": "inventory",
+  "interna": "/admin/products",
+  "acceso": "autenticada",
+  "politica": "ROLES-CATALOGO",
+  "roles": [
+   "administrador",
+   "dueno"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R08",
+  "servicio": "S08",
+  "verbo": "POST",
+  "externa": "/api/v1/products",
+  "sistema": "inventory",
+  "interna": "/products",
+  "acceso": "autenticada",
+  "politica": "ROLES-CATALOGO",
+  "roles": [
+   "administrador",
+   "dueno"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R09",
+  "servicio": "S09",
+  "verbo": "PUT",
+  "externa": "/api/v1/products/{id}",
+  "sistema": "inventory",
+  "interna": "/products/{id}",
+  "acceso": "autenticada",
+  "politica": "ROLES-CATALOGO",
+  "roles": [
+   "administrador",
+   "dueno"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R10",
+  "servicio": "S10",
+  "verbo": "DELETE",
+  "externa": "/api/v1/products/{id}",
+  "sistema": "inventory",
+  "interna": "/products/{id}",
+  "acceso": "autenticada",
+  "politica": "ROLES-CATALOGO",
+  "roles": [
+   "administrador",
+   "dueno"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R11",
+  "servicio": "S11",
+  "verbo": "PUT",
+  "externa": "/api/v1/products/{id}/stock",
+  "sistema": "inventory",
+  "interna": "/products/{id}/stock",
+  "acceso": "autenticada",
+  "politica": "ROLES-CATALOGO",
+  "roles": [
+   "administrador",
+   "dueno"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R12",
+  "servicio": "S12",
+  "verbo": "POST",
+  "externa": "/api/v1/orders",
+  "sistema": "orders",
+  "interna": "/orders",
+  "acceso": "autenticada",
+  "politica": "ROLES-CLIENTE",
+  "roles": [
+   "cliente"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": [
+   "idempotency-key"
+  ]
+ },
+ {
+  "id": "R13",
+  "servicio": "S13",
+  "verbo": "GET",
+  "externa": "/api/v1/orders",
+  "sistema": "orders",
+  "interna": "/orders",
+  "acceso": "autenticada",
+  "politica": "ROLES-CLIENTE",
+  "roles": [
+   "cliente"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R14",
+  "servicio": "S14",
+  "verbo": "GET",
+  "externa": "/api/v1/orders/{id}",
+  "sistema": "orders",
+  "interna": "/orders/{id}",
+  "acceso": "autenticada",
+  "politica": "ROLES-PEDIDO-LECTURA",
+  "roles": [
+   "administrador",
+   "cajero_virtual",
+   "cliente",
+   "encargado_despachos"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R15",
+  "servicio": "S15",
+  "verbo": "POST",
+  "externa": "/api/v1/orders/{id}/cancel",
+  "sistema": "orders",
+  "interna": "/orders/{id}/cancel",
+  "acceso": "autenticada",
+  "politica": "ROLES-CLIENTE",
+  "roles": [
+   "cliente"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R16",
+  "servicio": "S16",
+  "verbo": "GET",
+  "externa": "/api/v1/admin/orders",
+  "sistema": "orders",
+  "interna": "/admin/orders",
+  "acceso": "autenticada",
+  "politica": "ROLES-PEDIDOS-PERSONAL",
+  "roles": [
+   "administrador",
+   "cajero_virtual",
+   "encargado_despachos"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R17",
+  "servicio": "S17",
+  "verbo": "PATCH",
+  "externa": "/api/v1/admin/orders/{id}/status",
+  "sistema": "orders",
+  "interna": "/admin/orders/{id}/status",
+  "acceso": "autenticada",
+  "politica": "ROLES-DESPACHO",
+  "roles": [
+   "administrador",
+   "encargado_despachos"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R18",
+  "servicio": "S18",
+  "verbo": "GET",
+  "externa": "/api/v1/admin/dispatch-orders",
+  "sistema": "dispatch",
+  "interna": "/admin/dispatch-orders",
+  "acceso": "autenticada",
+  "politica": "ROLES-DESPACHO",
+  "roles": [
+   "administrador",
+   "encargado_despachos"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R19",
+  "servicio": "S19",
+  "verbo": "GET",
+  "externa": "/api/v1/admin/dispatch-orders/{pedidoId}/print",
+  "sistema": "dispatch",
+  "interna": "/admin/dispatch-orders/{pedidoId}/print",
+  "acceso": "autenticada",
+  "politica": "ROLES-DESPACHO",
+  "roles": [
+   "administrador",
+   "encargado_despachos"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R20",
+  "servicio": "S20",
+  "verbo": "POST",
+  "externa": "/api/v1/orders/{id}/payments",
+  "sistema": "payments",
+  "interna": "/orders/{id}/payments",
+  "acceso": "autenticada",
+  "politica": "ROLES-CLIENTE",
+  "roles": [
+   "cliente"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R21",
+  "servicio": "S21",
+  "verbo": "POST",
+  "externa": "/api/v1/payments/webhook",
+  "sistema": "payments",
+  "interna": "/payments/webhook",
+  "acceso": "firma",
+  "politica": null,
+  "roles": [],
+  "rl": "RL-WEBHOOK",
+  "timeout": 5,
+  "body_kb": 16,
+  "passthrough": [
+   "x-timestamp",
+   "x-signature"
+  ]
+ },
+ {
+  "id": "R22",
+  "servicio": "S22",
+  "verbo": "GET",
+  "externa": "/api/v1/admin/sales",
+  "sistema": "payments",
+  "interna": "/admin/sales",
+  "acceso": "autenticada",
+  "politica": "ROLES-VENTAS",
+  "roles": [
+   "administrador",
+   "cajero_virtual"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R23",
+  "servicio": "S23",
+  "verbo": "GET",
+  "externa": "/api/v1/orders/{id}/receipt",
+  "sistema": "payments",
+  "interna": "/orders/{id}/receipt",
+  "acceso": "autenticada",
+  "politica": "ROLES-BOLETA",
+  "roles": [
+   "administrador",
+   "cajero_virtual",
+   "cliente"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R24",
+  "servicio": "S24",
+  "verbo": "GET",
+  "externa": "/api/v1/clients/me",
+  "sistema": "clients",
+  "interna": "/clients/me",
+  "acceso": "autenticada",
+  "politica": "ROLES-CLIENTE",
+  "roles": [
+   "cliente"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R25",
+  "servicio": "S25",
+  "verbo": "PUT",
+  "externa": "/api/v1/clients/me",
+  "sistema": "clients",
+  "interna": "/clients/me",
+  "acceso": "autenticada",
+  "politica": "ROLES-CLIENTE",
+  "roles": [
+   "cliente"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R26",
+  "servicio": "S26",
+  "verbo": "POST",
+  "externa": "/api/v1/admin/clients",
+  "sistema": "clients",
+  "interna": "/admin/clients",
+  "acceso": "autenticada",
+  "politica": "ROLES-ADMIN",
+  "roles": [
+   "administrador"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R27",
+  "servicio": "S27",
+  "verbo": "GET",
+  "externa": "/api/v1/admin/clients",
+  "sistema": "clients",
+  "interna": "/admin/clients",
+  "acceso": "autenticada",
+  "politica": "ROLES-ADMIN",
+  "roles": [
+   "administrador"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R28",
+  "servicio": "S28",
+  "verbo": "PUT",
+  "externa": "/api/v1/admin/clients/{id}",
+  "sistema": "clients",
+  "interna": "/admin/clients/{id}",
+  "acceso": "autenticada",
+  "politica": "ROLES-ADMIN",
+  "roles": [
+   "administrador"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R29",
+  "servicio": "S29",
+  "verbo": "DELETE",
+  "externa": "/api/v1/admin/clients/{id}",
+  "sistema": "clients",
+  "interna": "/admin/clients/{id}",
+  "acceso": "autenticada",
+  "politica": "ROLES-ADMIN",
+  "roles": [
+   "administrador"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R30",
+  "servicio": "S30",
+  "verbo": "POST",
+  "externa": "/api/v1/admin/users",
+  "sistema": "auth",
+  "interna": "/admin/users",
+  "acceso": "autenticada",
+  "politica": "ROLES-ADMIN",
+  "roles": [
+   "administrador"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R31",
+  "servicio": "S31",
+  "verbo": "GET",
+  "externa": "/api/v1/admin/users",
+  "sistema": "auth",
+  "interna": "/admin/users",
+  "acceso": "autenticada",
+  "politica": "ROLES-ADMIN",
+  "roles": [
+   "administrador"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R32",
+  "servicio": "S32",
+  "verbo": "PUT",
+  "externa": "/api/v1/admin/users/{id}",
+  "sistema": "auth",
+  "interna": "/admin/users/{id}",
+  "acceso": "autenticada",
+  "politica": "ROLES-ADMIN",
+  "roles": [
+   "administrador"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R33",
+  "servicio": "S33",
+  "verbo": "DELETE",
+  "externa": "/api/v1/admin/users/{id}",
+  "sistema": "auth",
+  "interna": "/admin/users/{id}",
+  "acceso": "autenticada",
+  "politica": "ROLES-ADMIN",
+  "roles": [
+   "administrador"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R34",
+  "servicio": "S34",
+  "verbo": "GET",
+  "externa": "/api/v1/admin/reports/sales",
+  "sistema": "payments",
+  "interna": "/admin/reports/sales",
+  "acceso": "autenticada",
+  "politica": "ROLES-REPORTE",
+  "roles": [
+   "administrador",
+   "dueno"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R35",
+  "servicio": "S35",
+  "verbo": "POST",
+  "externa": "/api/v1/contact-messages",
+  "sistema": "notifications",
+  "interna": "/contact-messages",
+  "acceso": "anonima",
+  "politica": null,
+  "roles": [],
+  "rl": "RL-SENSIBLE",
+  "timeout": 10,
+  "body_kb": 64,
+  "passthrough": []
+ },
+ {
+  "id": "R36",
+  "servicio": "GQL",
+  "verbo": "POST",
+  "externa": "/api/v1/graphql",
+  "sistema": "graphql",
+  "interna": "/graphql",
+  "acceso": "autenticada",
+  "politica": "ROLES-TODOS",
+  "roles": [
+   "administrador",
+   "cajero_virtual",
+   "cliente",
+   "dueno",
+   "encargado_despachos"
+  ],
+  "rl": "RL-USUARIO",
+  "timeout": 15,
+  "body_kb": 16,
+  "passthrough": []
+ }
+]

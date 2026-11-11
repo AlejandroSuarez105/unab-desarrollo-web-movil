@@ -1,0 +1,4 @@
+# Solo para ejecutar las pruebas desde el equipo (no van en las imagenes de los servicios)
+psutil==7.2.2
+playwright==1.63.0
+cryptography==50.0.1

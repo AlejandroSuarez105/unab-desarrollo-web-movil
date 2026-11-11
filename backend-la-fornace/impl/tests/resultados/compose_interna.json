@@ -1,0 +1,117 @@
+{
+ "suite": "compose_interna",
+ "ejecutado": "2026-11-08T22:07:06Z",
+ "segundos": 2.9,
+ "total": 18,
+ "ok": 18,
+ "casos": [
+  {
+   "id": "CMP-RED-01",
+   "descripcion": "orders-service llamado desde otro contenedor sin secreto, con el secreto de otro destino, con el suyo pero sin identidad, y con un par de otro sistema: siempre rechazado",
+   "estado": "OK",
+   "observado": "sin secreto=401, secreto de otro destino=401, secreto propio sin identidad=401, par de otro sistema=403"
+  },
+  {
+   "id": "CMP-RED-02",
+   "descripcion": "GraphQL Gateway llamado directamente sin secreto, con el de otro destino y con el de orders: 401 en los tres",
+   "estado": "OK",
+   "observado": "401, 401, 401"
+  },
+  {
+   "id": "CMP-RED-03",
+   "descripcion": "El API Gateway no publica /internal, /docs ni la introspeccion de Auth",
+   "estado": "OK",
+   "observado": "404, 404, 404"
+  },
+  {
+   "id": "CMP-DB-01",
+   "descripcion": "MongoDB rechaza una conexion sin credenciales: no puede leer ni listar las colecciones de orders_db",
+   "estado": "OK",
+   "observado": "leer: rechazado (codigo 13); listar: rechazado (codigo 13)"
+  },
+  {
+   "id": "CMP-DB-02",
+   "descripcion": "Cada sistema, con su usuario de MongoDB, escribe y lee en su base y es rechazado (Unauthorized) en las de los otros seis",
+   "estado": "OK",
+   "observado": "bases propias accesibles=7/7; bases ajenas rechazadas=42/42"
+  },
+  {
+   "id": "CMP-DB-03",
+   "descripcion": "MongoDB tiene exactamente un usuario por sistema, definido en la base del sistema y con el unico rol readWrite sobre esa base",
+   "estado": "OK",
+   "observado": "auth_user: auth_db ['readWrite@auth_db']; clients_user: clients_db ['readWrite@clients_db']; dispatch_user: dispatch_db ['readWrite@dispatch_db']; inventory_user: inventory_db ['readWrite@inventory_db']; notifications_user: notifications_db ['readWrite@notifications_db']; orders_user: orders_db ['readWrite@orders_db']; payments_user: payments_db ['readWrite@payments_db']"
+  },
+  {
+   "id": "CMP-01",
+   "descripcion": "Catalogo publico sin sesion: 12 productos, sin stock",
+   "estado": "OK",
+   "observado": "200, 12 productos"
+  },
+  {
+   "id": "CMP-02",
+   "descripcion": "Operacion protegida sin token: 401",
+   "estado": "OK",
+   "observado": "401"
+  },
+  {
+   "id": "CMP-03",
+   "descripcion": "Registro (S03), correo con enlace en la bandeja de prueba, confirmacion (S04) e inicio de sesion (S01) de dos clientes",
+   "estado": "OK",
+   "observado": "clientes cli_0003 y cli_0004"
+  },
+  {
+   "id": "CMP-04",
+   "descripcion": "Pedido con precio fijado por el servidor, pago por la pasarela de prueba con aviso firmado y pedido en estado pagado",
+   "estado": "OK",
+   "observado": "ped_0001 estado=pagado total=3980"
+  },
+  {
+   "id": "CMP-05",
+   "descripcion": "Stock descontado en inventory por el pedido pagado",
+   "estado": "OK",
+   "observado": "200 -> 198"
+  },
+  {
+   "id": "CMP-06",
+   "descripcion": "Boleta enviada por correo (proveedor de prueba) y disponible por S23",
+   "estado": "OK",
+   "observado": "1 correo(s) con la boleta"
+  },
+  {
+   "id": "CMP-07",
+   "descripcion": "La orden de despacho llega por la cola STOMP y el encargado la ve sin precios",
+   "estado": "OK",
+   "observado": "1 orden(es)"
+  },
+  {
+   "id": "CMP-08",
+   "descripcion": "Consulta autorizada (cuenta dueña) 200; cuenta distinta 404 identico al de un pedido inexistente (regla C1 en orders-service)",
+   "estado": "OK",
+   "observado": "dueña=200, otra cuenta=404 NO_ENCONTRADO, inexistente=404"
+  },
+  {
+   "id": "CMP-09",
+   "descripcion": "GraphQL: resumenPedido combina orders e inventory para la dueña; otra cuenta recibe NO_ENCONTRADO; el requestId aparece en los registros de cada sistema",
+   "estado": "OK",
+   "observado": "archivos con el requestId: ['api-gateway.log', 'auth-service.log', 'graphql-gateway.log', 'inventory-service.log', 'orders-service.log']"
+  },
+  {
+   "id": "CMP-10",
+   "descripcion": "Aviso de pago con firma invalida (como lo haria un navegador alterado): 401",
+   "estado": "OK",
+   "observado": "401"
+  },
+  {
+   "id": "CMP-11",
+   "descripcion": "Reporte de ventas: 200 para el dueño y 403 para un cliente",
+   "estado": "OK",
+   "observado": "200, 403"
+  },
+  {
+   "id": "CMP-12",
+   "descripcion": "Los registros compartidos no contienen contraseñas, correos ni direcciones de las pruebas",
+   "estado": "OK",
+   "observado": "4 valores buscados en /logs; coincidencias=0"
+  }
+ ]
+}

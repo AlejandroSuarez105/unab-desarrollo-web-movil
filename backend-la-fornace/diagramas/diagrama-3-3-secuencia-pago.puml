@@ -1,0 +1,86 @@
+@startuml diagrama-3-3-secuencia-pago
+title Diagrama 3.3 - Pago, aviso de la plataforma y confirmacion del pedido (S20, S21)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam sequenceMessageAlign left
+skinparam ParticipantPadding 15
+autonumber
+
+actor Cliente
+participant "Frontend" as FE
+participant "API Gateway" as GW
+participant "payments-service" as PAY
+participant "orders-service" as ORD
+participant "inventory-service" as INV
+participant "Plataforma\nde pago" as PP
+queue "ActiveMQ" as MQ
+participant "dispatch-service" as DIS
+participant "notifications-service" as NOT
+
+== Iniciar el pago (S20) ==
+Cliente -> FE : "Pagar" (medio: servipag)
+FE -> GW : POST /api/v1/orders/{id}/payments {medio}
+GW -> PAY : POST /payments (cuentaId verificado en X-Authenticated-User)
+PAY -> ORD : I11 GET /internal/orders/{id}/payable?cuentaId=...\nX-Service-Id: payments-service
+ORD --> PAY : {pedidoId, total, estado: pendiente_pago, expiraEn}\n(404 si no es del usuario, 409 si no esta pendiente o vencio)
+PAY -> PP : I16 crear cobro {pagoId, monto = total del pedido}
+PP --> PAY : {urlPago}
+PAY -> PAY : guarda Pago (pendiente)
+PAY --> FE : 201 {pagoId, estado: pendiente, urlPago, expiraEn}
+FE -> PP : redirige al cliente a urlPago
+note over FE
+  El navegador nunca informa que el pedido esta pagado.
+  Al volver solo consulta S14 y muestra el estado que dice orders.
+end note
+
+== Aviso de la plataforma (S21) ==
+PP -> GW : POST /api/v1/payments/webhook\nX-Timestamp, X-Signature, {eventoId, pagoId, estado, monto}
+GW -> PAY : reenvia sin Bearer (ruta publica con firma, limitada por tasa)
+PAY -> PAY : 1. valida firma HMAC-SHA256 y marca de tiempo (<= 5 min)
+alt firma invalida
+  PAY --> PP : 401 (no se guarda nada)
+else firma valida
+  PAY -> PAY : 2. eventoId ya registrado?
+  alt aviso repetido
+    PAY --> PP : 200 {recibido: true} (no se procesa otra vez)
+  else aviso nuevo
+    PAY -> PAY : 3. registra EventoPago (indice unico en eventoId)\n4. compara monto y estado contra el Pago guardado
+    alt monto distinto o pago no pendiente
+      PAY -> PAY : Pago pasa a "observado" (revision manual)
+      PAY --> PP : 200 {recibido: true} (el pedido no cambia)
+    else estado rechazado o expirado
+      PAY -> PAY : Pago rechazado/expirado (el pedido sigue pendiente_pago)
+      PAY --> PP : 200 {recibido: true}
+    else estado aprobado y monto correcto
+      PAY -> PAY : Pago pasa a "aprobado"
+      PAY -> ORD : I12 POST /internal/orders/{id}/payment-confirmation\n{pagoId, monto}
+      alt pedido pendiente_pago y no vencido
+        ORD -> ORD : pasa a "pagado" + CambioEstado (actor: sistema)
+        ORD -> INV : I09 confirmar reserva {pedidoId}
+        ORD -> MQ : I14 orden de despacho {tipo: nueva, pedidoId, cliente, items}
+        MQ -> DIS : entrega el mensaje
+        DIS -> DIS : guarda OrdenDespacho (una por pedidoId)
+        ORD --> PAY : 200 {pedidoId, total, cuentaId, clienteNombre,\nclienteCorreo, items[...], pagadoEn}
+        PAY -> PAY : crea Venta + LineaVenta en la caja virtual\ngenera numero de boleta y crea Boleta
+        PAY -> NOT : I13 enviar boleta al correo del cliente
+        NOT --> PAY : 202 (si falla: correoEnviado = false y se reintenta)
+        PAY --> PP : 200 {recibido: true}
+      else pedido anulado o vencido
+        ORD --> PAY : 409 PEDIDO_NO_PAGABLE
+        PAY -> PAY : Pago "observado" (queda para reembolso manual)
+        PAY --> PP : 200 {recibido: true}
+      else orders no responde
+        PAY -> PAY : Pago queda aprobado con confirmadoEnPedidos = false
+        PAY --> PP : 200 {recibido: true}
+        note right of PAY
+          Una tarea cada 30 s repite I12.
+          orders ignora la repeticion si ya confirmo (idempotente por pagoId).
+        end note
+      end
+    end
+  end
+end
+@enduml

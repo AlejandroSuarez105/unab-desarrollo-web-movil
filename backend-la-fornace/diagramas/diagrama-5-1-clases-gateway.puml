@@ -1,0 +1,226 @@
+@startuml diagrama-5-1-clases-gateway
+title Diagrama 5.1 - Clases del API Gateway, politicas, secretos y GraphQL Gateway
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam ranksep 50
+skinparam nodesep 35
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #444444
+  ArrowColor #333333
+}
+skinparam enum {
+  BackgroundColor #FFF8E1
+  BorderColor #8D6E00
+}
+hide empty methods
+hide circle
+
+' ===============================================================
+package "API Gateway (borde, unico puerto publicado)" #FDEDEC {
+  class ApiGateway {
+    -puerto : Integer
+    -tlsHabilitado : Boolean
+    +manejar(req: SolicitudHttp) : RespuestaHttp
+    -resolverRuta(metodo, ruta) : RouteDefinition
+    -limpiarCabecerasInternas(req)
+    -propagarContexto(req, id: Identity)
+    -reenviar(req, ruta: RouteDefinition) : RespuestaHttp
+  }
+  class RouteDefinition {
+    +id : String
+    +idServicio : String
+    +metodo : MetodoHttp
+    +rutaExterna : String
+    +rutaInterna : String
+    +claseAcceso : ClaseAcceso
+    +maxBodyBytes : Integer
+  }
+  interface AuthenticationPolicy {
+    +autenticar(req) : Identity
+  }
+  class NoAuthentication
+  class BearerAuthentication {
+    -refIntrospeccion : SecretRef
+  }
+  class AuthorizationPolicy {
+    +nombre : String
+    +roles : Rol [1..*]
+    +autorizar(id: Identity) : Decision
+  }
+  class RateLimitPolicy {
+    +nombre : String
+    +maxSolicitudes : Integer
+    +ventanaSeg : Integer
+    +clave : ClaveLimite
+    +permitir(clave) : Boolean
+  }
+  class ServiceTarget {
+    +idSistema : String
+    +urlBase : String
+    +metodosPermitidos : MetodoHttp [1..*]
+    +prefijosPermitidos : String [1..*]
+    +timeoutMs : Integer
+    +refCredencial : SecretRef
+  }
+  class Identity {
+    +cuentaId : String
+    +correo : String
+    +roles : Rol [1..*]
+  }
+  class AuthClient {
+    +introspeccionar(token) : Identity
+  }
+  class ErrorMapper {
+    +responder(codigo, requestId) : RespuestaHttp
+  }
+  class AccessLogger {
+    +registrar(evento)
+    -redactar(evento)
+  }
+}
+
+' ===============================================================
+package "Secretos" #FEF9E7 {
+  interface SecretProvider {
+    +obtener(ref: SecretRef) : Secret
+  }
+  class VaultSecretProvider {
+    -direccion : String
+    -ttlCacheSeg : Integer
+    -refTokenVault : SecretRef
+  }
+  class SecretRef {
+    +nombre : String
+    +ruta : String
+  }
+}
+
+' ===============================================================
+package "Red privada: sistemas" #EAF2F8 {
+  abstract class PrivateSystem {
+    +id : String
+    +urlBase : String
+  }
+  note right of PrivateSystem
+    Representa a cada sistema privado:
+    auth, inventory, orders, clients,
+    payments, dispatch y notifications.
+    El GraphQL Gateway tambien es un
+    PrivateSystem (destino de una ruta).
+  end note
+  class InternalAccessGuard {
+    +verificarGateway(req) : Boolean
+    +verificarLlamador(req) : Boolean
+    +verificarRol(req, ruta) : Boolean
+  }
+  class BusinessRules {
+    +verificarPropiedad(recurso, cuentaId)
+    +verificarEstado(recurso, accion)
+  }
+}
+
+' ===============================================================
+package "Red privada: GraphQL Gateway" #E9F7EF {
+  class GraphQLGateway {
+    +rutaInterna : String
+    +ejecutar(consulta, ctx: Identity) : Resultado
+  }
+  class QueryLimits {
+    +maxProfundidad : Integer
+    +maxCosto : Integer
+    +maxPagina : Integer
+    +plazoMs : Integer
+  }
+  class Schema {
+    +tipos : TypeDef [1..*]
+    +queries : String [1..*]
+  }
+  class FieldPolicy {
+    +campo : String
+    +roles : Rol [1..*]
+  }
+  class Resolver {
+    +operacion : String
+    +resolver(args, ctx: Identity) : Object
+  }
+  class BatchLoader {
+    +cargar(ids : String [1..*]) : Object [*]
+  }
+  abstract class SubsystemAdapter {
+    +idSistema : String
+    +refCredencial : SecretRef
+    +llamar(ruta, ctx: Identity) : Object
+  }
+  class OrdersAdapter
+  class InventoryAdapter
+  class ClientsAdapter
+}
+
+' ===============================================================
+enum ClaseAcceso {
+  anonima
+  firma_proveedor
+  autenticada
+  administrativa
+}
+enum ClaveLimite {
+  origen_ip
+  cuenta
+}
+class Vault <<externo>> #FFF3CD {
+  administrador de secretos,
+  fuera del codigo
+}
+
+' ---------------- relaciones estructurales ----------------
+ApiGateway "1" *-- "1..*" RouteDefinition : define >
+RouteDefinition "*" --> "1" AuthenticationPolicy : autentica con >
+RouteDefinition "*" --> "1" AuthorizationPolicy : autoriza con >
+RouteDefinition "*" --> "0..1" RateLimitPolicy : limita con >
+RouteDefinition "*" --> "1" ServiceTarget : apunta a >
+BearerAuthentication ..|> AuthenticationPolicy
+NoAuthentication ..|> AuthenticationPolicy
+BearerAuthentication "1" --> "1" AuthClient : usa >
+ApiGateway "1" o-- "1" ErrorMapper
+ApiGateway "1" o-- "1" AccessLogger
+ApiGateway "1" --> "1" SecretProvider : obtiene secretos de >
+VaultSecretProvider ..|> SecretProvider
+SecretProvider "1" ..> "*" SecretRef
+ServiceTarget "1" --> "1" PrivateSystem : destino >
+
+PrivateSystem <|-- GraphQLGateway
+PrivateSystem "1" *-- "1" InternalAccessGuard : se protege con >
+PrivateSystem "1" *-- "1" BusinessRules : aplica >
+
+GraphQLGateway "1" *-- "1" Schema : expone >
+GraphQLGateway "1" *-- "1" QueryLimits : limita con >
+GraphQLGateway "1" *-- "1..*" Resolver : resuelve con >
+Schema "1" *-- "0..*" FieldPolicy : protege campos con >
+Resolver "*" --> "1..*" SubsystemAdapter : consulta por >
+Resolver "*" --> "0..1" BatchLoader : agrupa con >
+SubsystemAdapter <|-- OrdersAdapter
+SubsystemAdapter <|-- InventoryAdapter
+SubsystemAdapter <|-- ClientsAdapter
+
+' ---------------- dependencias de comunicacion ----------------
+AuthClient ..> PrivateSystem : <<llamada I01 a auth-service>>
+SubsystemAdapter ..> PrivateSystem : <<GET de lectura>>
+SubsystemAdapter ..> SecretProvider : <<usa>>
+InternalAccessGuard ..> SecretProvider : <<usa>>
+VaultSecretProvider ..> Vault : <<lee, solo lectura>>
+
+legend bottom right
+  <b>Leyenda</b>
+  linea continua con rombo o multiplicidad: relacion estructural (clases y atributos)
+  flecha punteada con <<...>>: dependencia de comunicacion en tiempo de ejecucion
+  triangulo hueco: herencia o implementacion de una interfaz
+  El mapa de red y las fronteras de confianza estan en el Diagrama 5.2.
+  No se modelan servicio de analitica ni cliente gRPC: ver decision en 5.13.
+end legend
+@enduml

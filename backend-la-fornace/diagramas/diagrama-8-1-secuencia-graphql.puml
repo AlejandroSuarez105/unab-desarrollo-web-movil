@@ -1,0 +1,56 @@
+@startuml diagrama-8-1-secuencia-graphql
+title Diagrama 8.1 - resumenPedido: agregacion de orders e inventory
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 110
+skinparam sequenceMessageAlign left
+autonumber
+
+actor "Cliente A" as C
+participant "Frontend (P11)" as FE
+participant "API Gateway" as GW
+participant "GraphQL Gateway" as GQL
+participant "orders-service" as ORD
+participant "inventory-service" as INV
+
+== Caso 1: consulta autorizada ==
+C -> FE : Ver detalle del pedido ped_0001
+FE -> GW : POST /api/v1/graphql\nAuthorization: Bearer <token>\n{ resumenPedido(id: "ped_0001") ... }
+GW -> GW : token valido (I01), rol en ROLES-TODOS,\nlimite por cuenta, cuerpo <= 16 KB
+GW -> GQL : POST /graphql\nX-Gateway-Secret (gateway-to-graphql)\nX-Authenticated-User / Roles / X-Request-Id
+GQL -> GQL : 1 una sola operacion, sin alias repetidos\n2 profundidad y costo dentro del limite\n3 rol permitido en resumenPedido\n4 cada campo pedido permitido para el rol
+GQL -> ORD : GET /orders/ped_0001\nX-Service-Id: graphql-gateway (graphql-to-orders)\nX-Authenticated-User: cta_A
+ORD -> ORD : filtra por id y cuentaId (C1)
+ORD --> GQL : 200 pedido con items
+GQL -> INV : GET /products?ids=prod_001,prod_007\n(graphql-to-inventory) una sola llamada\npara todos los items
+INV --> GQL : 200 campos publicos (C12)
+GQL -> GQL : une cada item con su producto vigente
+GQL --> GW : 200 { data: { resumenPedido: ... } }
+GW --> FE : 200
+FE --> C : Detalle con foto y descripcion
+
+== Caso 2: inventory no responde (error parcial) ==
+FE -> GW : mismo POST
+GW -> GQL : mismo reenvio
+GQL -> ORD : GET /orders/ped_0001
+ORD --> GQL : 200
+GQL -> INV : GET /products?ids=... (plazo 5 s)
+INV -[#red]-> GQL : sin respuesta
+GQL --> FE : 200 { data: pedido con items (nombre y precio congelados),\nproducto: null }\nerrors: [ SUBSISTEMA_NO_DISPONIBLE en items.producto ]
+
+== Caso 3: campo no autorizado para el rol ==
+FE -> GW : { resumenPedido(id) { clienteNombre } } con rol cliente
+GW -> GQL : reenvio
+GQL -> GQL : FieldPolicy: clienteNombre solo para personal
+GQL --> FE : 200 { errors: [ CAMPO_NO_AUTORIZADO ] }\nsin llamar a orders ni a inventory
+
+== Caso 4: pedido de otra cuenta ==
+FE -> GW : { resumenPedido(id: "ped_0001") } con la sesion del cliente B
+GW -> GQL : reenvio
+GQL -> ORD : GET /orders/ped_0001\nX-Authenticated-User: cta_B
+ORD --> GQL : 404 NO_ENCONTRADO
+GQL --> FE : 200 { data: { resumenPedido: null },\nerrors: [ NO_ENCONTRADO ] }\nsin llamar a inventory
+
+@enduml

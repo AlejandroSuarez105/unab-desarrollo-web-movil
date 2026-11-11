@@ -1,0 +1,81 @@
+@startuml diagrama-10-1-implementacion
+title Diagrama 10.1 - Implementacion entregada: procesos, puertos y accesos
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam ranksep 50
+skinparam nodesep 30
+skinparam componentStyle rectangle
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #444444
+}
+skinparam database {
+  BackgroundColor #FFF8E1
+  BorderColor #8D6E00
+}
+skinparam ArrowColor #333333
+
+rectangle "Navegador" #F4F6F7 {
+  component "Frontend :8080\nsessionStorage: solo el token de sesion" as FE
+}
+rectangle "Unico punto de entrada (TLS)" #FDEDEC {
+  component "api-gateway :8443\nruta permitida, token (I01), rol,\nlimites, CORS, requestId" as GW
+}
+rectangle "Red privada (cada sistema exige el secreto del par y la identidad del gateway)" #EAF2F8 {
+  component "auth :9101" as AU
+  component "clients :9102" as CL
+  component "inventory :9103" as IN
+  component "orders :9104" as OR
+  component "payments :9105" as PA
+  component "dispatch :9106" as DI
+  component "notifications :9107" as NO
+  component "graphql-gateway :9108\nsolo lectura" as GQ
+  database "auth_db" as DAU
+  database "clients_db" as DCL
+  database "inventory_db" as DIN
+  database "orders_db" as DOR
+  database "payments_db" as DPA
+  database "dispatch_db" as DDI
+  database "notifications_db" as DNO
+  queue "cola_pedidos\n(STOMP :61613)" as Q
+  component "Vault :8200\nun token de solo lectura por componente" as V
+}
+cloud "Adaptadores de prueba" #F2F2F2 {
+  component "pasarela-prueba :9201" as PP
+  component "correo-prueba :9202" as CP
+}
+
+FE --> GW : HTTPS /api/v1
+GW --> AU
+GW --> CL
+GW --> IN
+GW --> OR
+GW --> PA
+GW --> DI
+GW --> NO
+GW --> GQ
+GQ --> OR : solo GET
+GQ --> IN : solo GET
+GQ --> CL : solo GET
+OR --> IN : reserva (I08)
+OR --> CL : perfil (I07)
+OR --> Q : orden de despacho
+Q --> DI
+PA --> OR : pago confirmado (I12)
+PA --> PP : cobro
+PP ..> GW : aviso firmado (HMAC)
+PA --> NO : boleta
+NO --> CP
+CL --> AU : cuentas (I03)
+AU -- DAU
+CL -- DCL
+IN -- DIN
+OR -- DOR
+PA -- DPA
+DI -- DDI
+NO -- DNO
+V .. AU : secretos
+@enduml

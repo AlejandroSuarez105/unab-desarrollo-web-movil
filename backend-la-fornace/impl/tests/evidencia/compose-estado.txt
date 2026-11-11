@@ -1,0 +1,17 @@
+$ C:\Users\Alejandro\Desktop\La-Fornace-Backend-probar-todo\La-Fornace-Backend\.venv\Scripts\python.exe scripts/compose.py estado
+SERVICE                 STATE     <no value>   PORTS
+api-gateway             running   healthy      127.0.0.1:8443->8000/tcp
+auth-service            running   healthy      8000/tcp
+broker                  running                1099/tcp, 1883/tcp, 5672/tcp, 8161/tcp, 61613-61614/tcp, 61616/tcp
+clients-service         running   healthy      8000/tcp
+correo-prueba           running   healthy      8000/tcp
+dispatch-service        running   healthy      8000/tcp
+frontend                running                127.0.0.1:8080->8080/tcp
+graphql-gateway         running   healthy      8000/tcp
+inventory-service       running   healthy      8000/tcp
+mongo                   running                27017/tcp
+notifications-service   running   healthy      8000/tcp
+orders-service          running   healthy      8000/tcp
+pasarela-prueba         running   healthy      127.0.0.1:9201->8000/tcp
+payments-service        running   healthy      8000/tcp
+vault                   running                8200/tcp

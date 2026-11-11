@@ -1,0 +1,129 @@
+@startuml diagrama-2-3-servicios-entidades
+title Diagrama 2.3 - Servicios publicos y entidades del dominio que usan
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 110
+skinparam ranksep 120
+skinparam nodesep 14
+skinparam packageStyle rectangle
+skinparam class {
+  BorderColor #444444
+  ArrowColor #666666
+}
+hide empty members
+hide circle
+
+' ---------------------------------------------------------------
+' Servicios publicos (operaciones = IDs del Modulo 1)
+' ---------------------------------------------------------------
+package "Servicios publicos" #EEF2FF {
+  class AuthService <<service>> #FFFFFF
+  class CatalogService <<service>> #FFFFFF
+  class InventoryAdminService <<service>> #FFFFFF
+  class OrderService <<service>> #FFFFFF
+  class OrderOpsService <<service>> #FFFFFF
+  class DispatchService <<service>> #FFFFFF
+  class PaymentService <<service>> #FFFFFF
+  class SalesService <<service>> #FFFFFF
+  class ClientService <<service>> #FFFFFF
+  class ClientAdminService <<service>> #FFFFFF
+  class UserAdminService <<service>> #FFFFFF
+  class ReportService <<service>> #FFFFFF
+  class ContactService <<service>> #FFFFFF
+}
+package "Entidades del dominio" #E9F7EF {
+  class Cuenta
+  class Sesion
+  class TokenVerificacion
+  class Usuario
+  class Cliente
+  class Direccion
+  class Producto
+  class MovimientoStock
+  class Pedido
+  class DetallePedido
+  class DireccionEntrega
+  class CambioEstado
+  class OrdenDespacho
+  class LineaDespacho
+  class Pago
+  class EventoPago
+  class Venta
+  class LineaVenta
+  class Boleta
+  class MensajeContacto
+}
+
+' ---------------------------------------------------------------
+' Dependencias servicio -> DTO (usa el contrato)
+' ---------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+' ---------------------------------------------------------------
+' Dependencias servicio -> entidad (usa la clase)
+' ---------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+AuthService ..> Cuenta
+AuthService ..> Sesion
+AuthService ..> TokenVerificacion
+CatalogService ..> Producto
+InventoryAdminService ..> Producto
+InventoryAdminService ..> MovimientoStock
+OrderService ..> Pedido
+OrderService ..> DetallePedido
+OrderService ..> DireccionEntrega
+OrderService ..> CambioEstado
+OrderOpsService ..> Pedido
+OrderOpsService ..> CambioEstado
+DispatchService ..> OrdenDespacho
+DispatchService ..> LineaDespacho
+PaymentService ..> Pago
+PaymentService ..> EventoPago
+SalesService ..> Venta
+SalesService ..> LineaVenta
+SalesService ..> Boleta
+ClientService ..> Cliente
+ClientService ..> Direccion
+ClientService ..> Cuenta
+ClientAdminService ..> Cliente
+ClientAdminService ..> Direccion
+ClientAdminService ..> Cuenta
+UserAdminService ..> Usuario
+UserAdminService ..> Cuenta
+ReportService ..> Venta
+ReportService ..> LineaVenta
+ContactService ..> MensajeContacto
+
+legend bottom right
+  <b>Leyenda</b>
+  <<service>> servicio publico (operaciones y IDs en el Diagrama 2.2)
+  flecha punteada: dependencia (el servicio usa la clase); no significa un registro por servicio
+  Las relaciones entre entidades y sus multiplicidades estan en el Diagrama 2.1
+end legend
+@enduml

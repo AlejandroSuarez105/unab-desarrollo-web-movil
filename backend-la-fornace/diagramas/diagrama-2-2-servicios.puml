@@ -1,0 +1,176 @@
+@startuml diagrama-2-2-servicios
+title Diagrama 2.2 - Servicios publicos y DTO (contratos con el frontend)
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 110
+skinparam ranksep 120
+skinparam nodesep 14
+skinparam packageStyle rectangle
+skinparam class {
+  BorderColor #444444
+  ArrowColor #666666
+}
+hide empty members
+hide circle
+
+' ---------------------------------------------------------------
+' Servicios publicos (operaciones = IDs del Modulo 1)
+' ---------------------------------------------------------------
+package "Servicios publicos" #EEF2FF {
+  class AuthService <<service>> #FFFFFF {
+    +iniciarSesion(c: CredencialesDTO) : SesionDTO  [S01]
+    +cerrarSesion() : void  [S02]
+    +confirmarCorreo(c: ConfirmacionCorreoDTO) : CuentaEstadoDTO  [S04]
+    +reenviarConfirmacion(correo: String) : void  [S05]
+  }
+  class CatalogService <<service>> #FFFFFF {
+    +consultarCatalogo(filtro) : ProductoPublicoDTO[]  [S06]
+  }
+  class InventoryAdminService <<service>> #FFFFFF {
+    +listarProductosAdmin(filtro) : ProductoAdminDTO[]  [S07]
+    +crearProducto(p: ProductoEntradaDTO) : ProductoPublicoDTO  [S08]
+    +modificarProducto(id, p: ProductoEntradaDTO) : ProductoPublicoDTO  [S09]
+    +retirarProducto(id: String) : void  [S10]
+    +actualizarStock(id, s: StockDTO) : StockDTO  [S11]
+  }
+  class OrderService <<service>> #FFFFFF {
+    +crearPedido(p: NuevoPedidoDTO) : PedidoDetalleDTO  [S12]
+    +listarMisPedidos(filtro) : PedidoResumenDTO[]  [S13]
+    +consultarPedido(id: String) : PedidoDetalleDTO  [S14]
+    +anularPedido(id, a: AnulacionDTO) : PedidoAnuladoDTO  [S15]
+  }
+  class OrderOpsService <<service>> #FFFFFF {
+    +listarPedidos(filtro) : PedidoOperacionDTO[]  [S16]
+    +cambiarEstado(id, c: CambioEstadoDTO) : PedidoDetalleDTO  [S17]
+  }
+  class DispatchService <<service>> #FFFFFF {
+    +consultarColaDespacho(filtro) : OrdenDespachoDTO[]  [S18]
+    +obtenerOrdenImprimible(pedidoId: String) : DocumentoImprimibleDTO  [S19]
+  }
+  class PaymentService <<service>> #FFFFFF {
+    +iniciarPago(pedidoId, p: IniciarPagoDTO) : PagoIniciadoDTO  [S20]
+    +recibirNotificacionPago(n: NotificacionPagoDTO) : AcuseDTO  [S21]
+  }
+  class SalesService <<service>> #FFFFFF {
+    +listarVentas(filtro) : VentaResumenDTO[]  [S22]
+    +obtenerBoleta(pedidoId: String) : BoletaDTO  [S23]
+  }
+  class ClientService <<service>> #FFFFFF {
+    +registrarCliente(r: RegistroClienteDTO) : CuentaEstadoDTO  [S03]
+    +consultarMiPerfil() : PerfilClienteDTO  [S24]
+    +actualizarMiPerfil(p: ClienteEntradaDTO) : PerfilClienteDTO  [S25]
+  }
+  class ClientAdminService <<service>> #FFFFFF {
+    +registrarClientePresencial(c: RegistroPresencialDTO) : CuentaEstadoDTO  [S26]
+    +listarClientes(filtro) : ClienteAdminDTO[]  [S27]
+    +modificarCliente(id, c: ClienteEntradaDTO) : ClienteAdminDTO  [S28]
+    +darDeBajaCliente(id: String) : void  [S29]
+  }
+  class UserAdminService <<service>> #FFFFFF {
+    +crearUsuario(u: UsuarioEntradaDTO) : CuentaEstadoDTO  [S30]
+    +listarUsuarios(filtro) : UsuarioDTO[]  [S31]
+    +modificarUsuario(id, u: UsuarioEntradaDTO) : UsuarioDTO  [S32]
+    +darDeBajaUsuario(id: String) : void  [S33]
+  }
+  class ReportService <<service>> #FFFFFF {
+    +generarReporteVentas(desde, hasta) : ReporteVentasDTO  [S34]
+  }
+  class ContactService <<service>> #FFFFFF {
+    +enviarMensaje(m: MensajeContactoDTO) : AcuseDTO  [S35]
+  }
+}
+
+' ---------------------------------------------------------------
+' DTO: contratos que cruzan la frontera con el navegador
+' ---------------------------------------------------------------
+package "DTO (contratos con el frontend)" #FFFDF0 {
+  class CredencialesDTO <<DTO>>
+  class SesionDTO <<DTO>>
+  class RegistroClienteDTO <<DTO>>
+  class RegistroPresencialDTO <<DTO>>
+  class CuentaEstadoDTO <<DTO>>
+  class ConfirmacionCorreoDTO <<DTO>>
+  class ProductoPublicoDTO <<DTO>>
+  class ProductoAdminDTO <<DTO>>
+  class ProductoEntradaDTO <<DTO>>
+  class StockDTO <<DTO>>
+  class NuevoPedidoDTO <<DTO>>
+  class PedidoResumenDTO <<DTO>>
+  class PedidoDetalleDTO <<DTO>>
+  class AnulacionDTO <<DTO>>
+  class PedidoAnuladoDTO <<DTO>>
+  class PedidoOperacionDTO <<DTO>>
+  class CambioEstadoDTO <<DTO>>
+  class OrdenDespachoDTO <<DTO>>
+  class DocumentoImprimibleDTO <<DTO>>
+  class IniciarPagoDTO <<DTO>>
+  class PagoIniciadoDTO <<DTO>>
+  class NotificacionPagoDTO <<DTO>>
+  class VentaResumenDTO <<DTO>>
+  class BoletaDTO <<DTO>>
+  class PerfilClienteDTO <<DTO>>
+  class ClienteEntradaDTO <<DTO>>
+  class ClienteAdminDTO <<DTO>>
+  class UsuarioEntradaDTO <<DTO>>
+  class UsuarioDTO <<DTO>>
+  class ReporteVentasDTO <<DTO>>
+  class MensajeContactoDTO <<DTO>>
+  class AcuseDTO <<DTO>>
+}
+
+' ---------------------------------------------------------------
+' Entidades del dominio (detalle en el Diagrama 2.1)
+' ---------------------------------------------------------------
+
+AuthService ..> CredencialesDTO
+AuthService ..> SesionDTO
+AuthService ..> ConfirmacionCorreoDTO
+AuthService ..> CuentaEstadoDTO
+CatalogService ..> ProductoPublicoDTO
+InventoryAdminService ..> ProductoAdminDTO
+InventoryAdminService ..> ProductoEntradaDTO
+InventoryAdminService ..> ProductoPublicoDTO
+InventoryAdminService ..> StockDTO
+OrderService ..> NuevoPedidoDTO
+OrderService ..> PedidoResumenDTO
+OrderService ..> PedidoDetalleDTO
+OrderService ..> AnulacionDTO
+OrderService ..> PedidoAnuladoDTO
+OrderOpsService ..> PedidoOperacionDTO
+OrderOpsService ..> CambioEstadoDTO
+OrderOpsService ..> PedidoDetalleDTO
+DispatchService ..> OrdenDespachoDTO
+DispatchService ..> DocumentoImprimibleDTO
+PaymentService ..> IniciarPagoDTO
+PaymentService ..> PagoIniciadoDTO
+PaymentService ..> NotificacionPagoDTO
+PaymentService ..> AcuseDTO
+SalesService ..> VentaResumenDTO
+SalesService ..> BoletaDTO
+ClientService ..> RegistroClienteDTO
+ClientService ..> CuentaEstadoDTO
+ClientService ..> PerfilClienteDTO
+ClientService ..> ClienteEntradaDTO
+ClientAdminService ..> RegistroPresencialDTO
+ClientAdminService ..> ClienteAdminDTO
+ClientAdminService ..> ClienteEntradaDTO
+ClientAdminService ..> CuentaEstadoDTO
+UserAdminService ..> UsuarioEntradaDTO
+UserAdminService ..> UsuarioDTO
+UserAdminService ..> CuentaEstadoDTO
+ReportService ..> ReporteVentasDTO
+ContactService ..> MensajeContactoDTO
+ContactService ..> AcuseDTO
+
+legend bottom right
+  <b>Leyenda</b>
+  <<service>> servicio publico; cada operacion indica su ID del Modulo 1 entre corchetes
+  <<DTO>> contrato que viaja entre el navegador y el backend
+  flecha punteada: dependencia (el servicio usa el DTO); no es una relacion entre registros
+  Las entidades que usa cada servicio estan en el Diagrama 2.3
+end legend
+@enduml
